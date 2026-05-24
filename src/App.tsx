@@ -1641,8 +1641,8 @@ const CardioView = () => {
 
 // ─── ZEN MUSIC PLAYER ──────────────────────────────────────────────────────
 const ZEN_TRACKS = [
-  { id: 'zen',   name: 'Zen Flow',     desc: '432Hz · Meditation',  icon: '🧘' },
-  { id: 'power', name: 'Power Surge',  desc: '128 BPM · Workout',   icon: '⚡' },
+  { id: 'zen',   name: 'Deep Meditation',     desc: 'Ambient Chimes · Pad',  icon: '🧘' },
+  { id: 'power', name: 'Iron Gym Beats',  desc: '128 BPM · Hard Bass',   icon: '⚡' },
   { id: 'rain',  name: 'Rain Focus',   desc: 'Pink Noise · Calm',   icon: '🌧️' },
   { id: 'ocean', name: 'Ocean Waves',  desc: 'Wave Tone · Deep',    icon: '🌊' },
   { id: 'lofi',  name: 'Lofi Chill',  desc: '90 BPM · Beats',      icon: '🎵' },
@@ -1691,17 +1691,50 @@ const ZenPlayer = () => {
 
   /* ── TRACK ENGINES ── */
   const playZen = (ctx: AudioContext, m: GainNode) => {
-    const g = ctx.createGain(); g.gain.setValueAtTime(0, ctx.currentTime); g.gain.linearRampToValueAtTime(0.85, ctx.currentTime + 2.5); g.connect(m);
+    const g = ctx.createGain(); 
+    g.gain.setValueAtTime(0, ctx.currentTime); 
+    g.gain.linearRampToValueAtTime(0.85, ctx.currentTime + 3); 
+    g.connect(m);
+    
+    // Soft, deep pad drone
     const oscs: OscillatorNode[] = [];
-    [[432, 0.55],[528, 0.22],[639, 0.10],[741, 0.05]].forEach(([f, v]) => {
-      const o = ctx.createOscillator(), og = ctx.createGain();
-      o.type = 'sine'; o.frequency.value = f; og.gain.value = v;
-      o.connect(og); og.connect(g); o.start(); oscs.push(o);
+    [[108, 0.3], [110, 0.3], [216, 0.15], [324, 0.1], [432, 0.1], [434, 0.1], [648, 0.05]].forEach(([f, v]) => {
+      const o = ctx.createOscillator(), og = ctx.createGain(), fl = ctx.createBiquadFilter();
+      o.type = 'sine'; o.frequency.value = f; 
+      fl.type = 'lowpass'; fl.frequency.value = 600;
+      og.gain.value = v;
+      o.connect(fl); fl.connect(og); og.connect(g); o.start(); oscs.push(o);
     });
+    
+    // Slow evolving filter sweep
     const lfo = ctx.createOscillator(), lg = ctx.createGain();
-    lfo.frequency.value = 0.07; lg.gain.value = 0.12;
+    lfo.frequency.value = 0.05; lg.gain.value = 0.15;
     lfo.connect(lg); lg.connect(g.gain); lfo.start();
-    return () => { g.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.5); setTimeout(() => { oscs.forEach(o=>{try{o.stop()}catch(e){}}); try{lfo.stop()}catch(e){} }, 1600); };
+    
+    // Random meditative bell chimes
+    let stopped = false;
+    const bell = (t: number, f: number) => {
+      const o = ctx.createOscillator(), eg = ctx.createGain();
+      o.type = 'sine'; o.frequency.value = f;
+      eg.gain.setValueAtTime(0, t);
+      eg.gain.linearRampToValueAtTime(0.3, t + 0.1);
+      eg.gain.exponentialRampToValueAtTime(0.001, t + 6);
+      o.connect(eg); eg.connect(g);
+      o.start(t); o.stop(t + 6.1);
+    };
+    const bells = [864, 1296, 1728, 2160];
+    const schedBell = () => {
+      if (stopped) return;
+      bell(ctx.currentTime, bells[Math.floor(Math.random()*bells.length)]);
+      setTimeout(() => { if (!stopped) schedBell() }, (Math.random() * 8000) + 4000);
+    };
+    schedBell();
+    
+    return () => { 
+      stopped = true;
+      g.gain.linearRampToValueAtTime(0, ctx.currentTime + 2); 
+      setTimeout(() => { oscs.forEach(o=>{try{o.stop()}catch(e){}}); try{lfo.stop()}catch(e){} }, 2100); 
+    };
   };
 
   const playRain = (ctx: AudioContext, m: GainNode) => {
@@ -1725,14 +1758,73 @@ const ZenPlayer = () => {
   };
 
   const playPower = (ctx: AudioContext, m: GainNode) => {
-    const g=ctx.createGain();g.gain.setValueAtTime(0,ctx.currentTime);g.gain.linearRampToValueAtTime(0.7,ctx.currentTime+0.5);g.connect(m);
-    let stopped=false; const beat=60/128;
-    const kick=(t:number)=>{const o=ctx.createOscillator(),e=ctx.createGain();o.frequency.setValueAtTime(150,t);o.frequency.exponentialRampToValueAtTime(0.01,t+0.35);e.gain.setValueAtTime(1,t);e.gain.exponentialRampToValueAtTime(0.001,t+0.35);o.connect(e);e.connect(g);o.start(t);o.stop(t+0.35);};
-    const hat=(t:number,v=0.25)=>{const sz=Math.floor(ctx.sampleRate*0.05),b=ctx.createBuffer(1,sz,ctx.sampleRate),d=b.getChannelData(0);for(let i=0;i<sz;i++)d[i]=Math.random()*2-1;const s=ctx.createBufferSource();s.buffer=b;const f=ctx.createBiquadFilter();f.type='highpass';f.frequency.value=7000;const e=ctx.createGain();e.gain.setValueAtTime(v,t);e.gain.exponentialRampToValueAtTime(0.001,t+0.05);s.connect(f);f.connect(e);e.connect(g);s.start(t);};
-    const snare=(t:number)=>{const sz=Math.floor(ctx.sampleRate*0.15),b=ctx.createBuffer(1,sz,ctx.sampleRate),d=b.getChannelData(0);for(let i=0;i<sz;i++)d[i]=Math.random()*2-1;const s=ctx.createBufferSource();s.buffer=b;const f=ctx.createBiquadFilter();f.type='bandpass';f.frequency.value=1200;const e=ctx.createGain();e.gain.setValueAtTime(0.7,t);e.gain.exponentialRampToValueAtTime(0.001,t+0.15);s.connect(f);f.connect(e);e.connect(g);s.start(t);};
-    const bass=(t:number,fr:number)=>{const o=ctx.createOscillator(),f=ctx.createBiquadFilter(),e=ctx.createGain();o.type='sawtooth';o.frequency.value=fr;f.type='lowpass';f.frequency.value=350;e.gain.setValueAtTime(0.45,t);e.gain.exponentialRampToValueAtTime(0.001,t+beat*0.8);o.connect(f);f.connect(e);e.connect(g);o.start(t);o.stop(t+beat*0.9);};
-    const bassLine=[80,80,100,80,60,80,80,100]; let bar=0;
-    const sched=()=>{if(stopped)return;const now=ctx.currentTime;for(let i=0;i<4;i++){const t=now+i*beat;kick(t);hat(t+beat*0.5,0.18);hat(t,0.12);if(i===1||i===3)snare(t);bass(t,bassLine[(bar*4+i)%bassLine.length]);}bar++;setTimeout(()=>{if(!stopped)sched();},beat*4*1000-80);};
+    const g=ctx.createGain();g.gain.setValueAtTime(0,ctx.currentTime);g.gain.linearRampToValueAtTime(0.85,ctx.currentTime+0.5);g.connect(m);
+    let stopped=false; const beat=60/128; // 128 BPM
+    
+    // Hard Kick
+    const kick=(t:number)=>{
+      const o=ctx.createOscillator(), e=ctx.createGain();
+      o.frequency.setValueAtTime(120,t); o.frequency.exponentialRampToValueAtTime(0.01,t+0.5);
+      e.gain.setValueAtTime(1,t); e.gain.exponentialRampToValueAtTime(0.001,t+0.5);
+      o.connect(e); e.connect(g); o.start(t); o.stop(t+0.5);
+    };
+    
+    // Punchy Snare/Clap
+    const snare=(t:number)=>{
+      const sz=Math.floor(ctx.sampleRate*0.25),b=ctx.createBuffer(1,sz,ctx.sampleRate),d=b.getChannelData(0);
+      for(let i=0;i<sz;i++) d[i]=Math.random()*2-1;
+      const s=ctx.createBufferSource(); s.buffer=b;
+      const f1=ctx.createBiquadFilter(), f2=ctx.createBiquadFilter();
+      f1.type='bandpass'; f1.frequency.value=2000; f1.Q.value=0.5;
+      f2.type='highpass'; f2.frequency.value=1000;
+      const e=ctx.createGain(); e.gain.setValueAtTime(0.9,t); e.gain.exponentialRampToValueAtTime(0.001,t+0.25);
+      s.connect(f1); f1.connect(f2); f2.connect(e); e.connect(g); s.start(t);
+      
+      // Tone body for snare
+      const to=ctx.createOscillator(), te=ctx.createGain();
+      to.type='triangle'; to.frequency.setValueAtTime(250,t); to.frequency.exponentialRampToValueAtTime(50,t+0.1);
+      te.gain.setValueAtTime(0.6,t); te.gain.exponentialRampToValueAtTime(0.001,t+0.15);
+      to.connect(te); te.connect(g); to.start(t); to.stop(t+0.2);
+    };
+    
+    // Crisp Hihat
+    const hat=(t:number,v=0.3)=>{
+      const sz=Math.floor(ctx.sampleRate*0.05),b=ctx.createBuffer(1,sz,ctx.sampleRate),d=b.getChannelData(0);
+      for(let i=0;i<sz;i++) d[i]=Math.random()*2-1;
+      const s=ctx.createBufferSource(); s.buffer=b;
+      const f=ctx.createBiquadFilter(); f.type='highpass'; f.frequency.value=8000;
+      const e=ctx.createGain(); e.gain.setValueAtTime(v,t); e.gain.exponentialRampToValueAtTime(0.001,t+0.05);
+      s.connect(f); f.connect(e); e.connect(g); s.start(t);
+    };
+    
+    // Pluck Bass
+    const bass=(t:number,fr:number,dur:number)=>{
+      const o=ctx.createOscillator(), f=ctx.createBiquadFilter(), e=ctx.createGain();
+      o.type='sawtooth'; o.frequency.value=fr;
+      f.type='lowpass'; f.frequency.setValueAtTime(1500,t); f.frequency.exponentialRampToValueAtTime(100,t+0.2); f.Q.value=5;
+      e.gain.setValueAtTime(0.7,t); e.gain.exponentialRampToValueAtTime(0.001,t+dur);
+      o.connect(f); f.connect(e); e.connect(g); o.start(t); o.stop(t+dur);
+    };
+    
+    const bassRiff = [41.2, 41.2, 49.0, 41.2, 36.7, 41.2, 41.2, 49.0];
+    let step=0;
+    
+    const sched=()=>{
+      if(stopped)return;
+      const now=ctx.currentTime;
+      for(let i=0;i<4;i++){
+        const t=now+i*beat;
+        kick(t);
+        hat(t+beat*0.5, 0.4); 
+        hat(t+beat*0.25, 0.15); 
+        hat(t+beat*0.75, 0.15);
+        if(i===1||i===3) snare(t);
+        bass(t+beat*0.25, bassRiff[(step*4+i)%bassRiff.length], beat*0.4);
+        bass(t+beat*0.75, bassRiff[(step*4+i)%bassRiff.length], beat*0.25);
+      }
+      step++;
+      setTimeout(()=>{if(!stopped)sched();},beat*4*1000-80);
+    };
     sched();
     return ()=>{stopped=true;g.gain.linearRampToValueAtTime(0,ctx.currentTime+0.3);};
   };
@@ -2557,10 +2649,10 @@ export default function App() {
               <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-32 bg-cyan-400/10 blur-[90px] rounded-full pointer-events-none"></div>
 
               {/* Elevated and highlighted brand logo */}
-              <div className="flex items-center justify-center gap-0 sm:gap-2 mt-2">
-                <img src="/icons/icon-512.png" alt="BurnOut Fire Logo" className="w-28 h-28 sm:w-64 sm:h-64 object-contain drop-shadow-[0_0_35px_rgba(34,211,238,0.6)] hover:scale-105 transition-transform duration-500" />
-                <h1 className="text-5xl sm:text-8xl font-black tracking-tighter leading-none text-white drop-shadow-[0_12px_24px_rgba(34,211,238,0.15)] uppercase select-none">
-                  Burn<span className="text-cyan-400 font-extrabold relative inline-block drop-shadow-[0_0_40px_rgba(34,211,238,0.45)]">out</span>
+              <div className="relative flex items-center justify-center mt-2 h-40 sm:h-64">
+                <img src="/icons/icon-512.png" alt="BurnOut Fire Logo" className="absolute w-40 h-40 sm:w-72 sm:h-72 object-contain drop-shadow-[0_0_35px_rgba(34,211,238,0.6)] transition-transform duration-700 opacity-50 blur-[1px] hover:blur-none hover:opacity-80" />
+                <h1 className="relative z-10 text-6xl sm:text-8xl font-black tracking-tighter leading-none text-white drop-shadow-[0_4px_30px_rgba(0,0,0,0.9)] uppercase select-none hover:scale-105 transition-transform duration-500">
+                  Burn<span className="text-cyan-400 font-extrabold relative inline-block drop-shadow-[0_0_40px_rgba(34,211,238,0.65)]">out</span>
                 </h1>
               </div>
 
