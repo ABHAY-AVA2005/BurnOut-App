@@ -1638,6 +1638,214 @@ const CardioView = () => {
   );
 };
 
+// ─── ZEN MUSIC PLAYER ──────────────────────────────────────────────────────
+const ZEN_TRACKS = [
+  { id: 'zen',   name: 'Zen Flow',     desc: '432Hz · Meditation',  icon: '🧘' },
+  { id: 'power', name: 'Power Surge',  desc: '128 BPM · Workout',   icon: '⚡' },
+  { id: 'rain',  name: 'Rain Focus',   desc: 'Pink Noise · Calm',   icon: '🌧️' },
+  { id: 'ocean', name: 'Ocean Waves',  desc: 'Wave Tone · Deep',    icon: '🌊' },
+  { id: 'lofi',  name: 'Lofi Chill',  desc: '90 BPM · Beats',      icon: '🎵' },
+];
+
+const ZenPlayer = () => {
+  const [open, setOpen] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [track, setTrack] = useState(0);
+  const [vol, setVol] = useState(0.55);
+  const ctxRef = useRef<any>(null);
+  const masterRef = useRef<any>(null);
+  const stopRef = useRef<any>(null);
+
+  const getCtx = () => {
+    if (!ctxRef.current || ctxRef.current.state === 'closed') {
+      ctxRef.current = new ((window as any).AudioContext || (window as any).webkitAudioContext)();
+    }
+    if (ctxRef.current.state === 'suspended') ctxRef.current.resume();
+    return ctxRef.current as AudioContext;
+  };
+
+  const getMaster = (ctx: AudioContext) => {
+    if (!masterRef.current) {
+      masterRef.current = ctx.createGain();
+      masterRef.current.connect(ctx.destination);
+    }
+    masterRef.current.gain.value = vol;
+    return masterRef.current as GainNode;
+  };
+
+  const stopAll = () => { if (stopRef.current) { stopRef.current(); stopRef.current = null; } };
+
+  /* ── TRACK ENGINES ── */
+  const playZen = (ctx: AudioContext, m: GainNode) => {
+    const g = ctx.createGain(); g.gain.setValueAtTime(0, ctx.currentTime); g.gain.linearRampToValueAtTime(0.85, ctx.currentTime + 2.5); g.connect(m);
+    const oscs: OscillatorNode[] = [];
+    [[432, 0.55],[528, 0.22],[639, 0.10],[741, 0.05]].forEach(([f, v]) => {
+      const o = ctx.createOscillator(), og = ctx.createGain();
+      o.type = 'sine'; o.frequency.value = f; og.gain.value = v;
+      o.connect(og); og.connect(g); o.start(); oscs.push(o);
+    });
+    const lfo = ctx.createOscillator(), lg = ctx.createGain();
+    lfo.frequency.value = 0.07; lg.gain.value = 0.12;
+    lfo.connect(lg); lg.connect(g.gain); lfo.start();
+    return () => { g.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.5); setTimeout(() => { oscs.forEach(o=>{try{o.stop()}catch(e){}}); try{lfo.stop()}catch(e){} }, 1600); };
+  };
+
+  const playRain = (ctx: AudioContext, m: GainNode) => {
+    const sz = 2 * ctx.sampleRate, buf = ctx.createBuffer(2, sz, ctx.sampleRate);
+    for (let c=0;c<2;c++){const d=buf.getChannelData(c);for(let i=0;i<sz;i++)d[i]=Math.random()*2-1;}
+    const src = ctx.createBufferSource(); src.buffer = buf; src.loop = true;
+    const f = ctx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=1500; f.Q.value=0.5;
+    const g = ctx.createGain(); g.gain.setValueAtTime(0,ctx.currentTime); g.gain.linearRampToValueAtTime(0.75,ctx.currentTime+2);
+    src.connect(f); f.connect(g); g.connect(m); src.start();
+    return () => { g.gain.linearRampToValueAtTime(0,ctx.currentTime+1.5); setTimeout(()=>{try{src.stop()}catch(e){}},1600); };
+  };
+
+  const playOcean = (ctx: AudioContext, m: GainNode) => {
+    const sz = 4*ctx.sampleRate, buf = ctx.createBuffer(2, sz, ctx.sampleRate);
+    for(let c=0;c<2;c++){const d=buf.getChannelData(c);let b0=0,b1=0,b2=0;for(let i=0;i<sz;i++){const w=Math.random()*2-1;b0=0.99886*b0+w*0.0555;b1=0.99332*b1+w*0.0751;b2=0.96900*b2+w*0.1539;d[i]=(b0+b1+b2+w*0.0185)*0.18;}}
+    const src=ctx.createBufferSource();src.buffer=buf;src.loop=true;
+    const g=ctx.createGain();g.gain.setValueAtTime(0,ctx.currentTime);g.gain.linearRampToValueAtTime(0.8,ctx.currentTime+2);
+    const lfo=ctx.createOscillator(),lg=ctx.createGain();lfo.frequency.value=0.05;lg.gain.value=0.28;lfo.connect(lg);lg.connect(g.gain);lfo.start();
+    src.connect(g);g.connect(m);src.start();
+    return ()=>{g.gain.linearRampToValueAtTime(0,ctx.currentTime+1.5);setTimeout(()=>{try{src.stop()}catch(e){};try{lfo.stop()}catch(e){}},1600);};
+  };
+
+  const playPower = (ctx: AudioContext, m: GainNode) => {
+    const g=ctx.createGain();g.gain.setValueAtTime(0,ctx.currentTime);g.gain.linearRampToValueAtTime(0.7,ctx.currentTime+0.5);g.connect(m);
+    let stopped=false; const beat=60/128;
+    const kick=(t:number)=>{const o=ctx.createOscillator(),e=ctx.createGain();o.frequency.setValueAtTime(150,t);o.frequency.exponentialRampToValueAtTime(0.01,t+0.35);e.gain.setValueAtTime(1,t);e.gain.exponentialRampToValueAtTime(0.001,t+0.35);o.connect(e);e.connect(g);o.start(t);o.stop(t+0.35);};
+    const hat=(t:number,v=0.25)=>{const sz=Math.floor(ctx.sampleRate*0.05),b=ctx.createBuffer(1,sz,ctx.sampleRate),d=b.getChannelData(0);for(let i=0;i<sz;i++)d[i]=Math.random()*2-1;const s=ctx.createBufferSource();s.buffer=b;const f=ctx.createBiquadFilter();f.type='highpass';f.frequency.value=7000;const e=ctx.createGain();e.gain.setValueAtTime(v,t);e.gain.exponentialRampToValueAtTime(0.001,t+0.05);s.connect(f);f.connect(e);e.connect(g);s.start(t);};
+    const snare=(t:number)=>{const sz=Math.floor(ctx.sampleRate*0.15),b=ctx.createBuffer(1,sz,ctx.sampleRate),d=b.getChannelData(0);for(let i=0;i<sz;i++)d[i]=Math.random()*2-1;const s=ctx.createBufferSource();s.buffer=b;const f=ctx.createBiquadFilter();f.type='bandpass';f.frequency.value=1200;const e=ctx.createGain();e.gain.setValueAtTime(0.7,t);e.gain.exponentialRampToValueAtTime(0.001,t+0.15);s.connect(f);f.connect(e);e.connect(g);s.start(t);};
+    const bass=(t:number,fr:number)=>{const o=ctx.createOscillator(),f=ctx.createBiquadFilter(),e=ctx.createGain();o.type='sawtooth';o.frequency.value=fr;f.type='lowpass';f.frequency.value=350;e.gain.setValueAtTime(0.45,t);e.gain.exponentialRampToValueAtTime(0.001,t+beat*0.8);o.connect(f);f.connect(e);e.connect(g);o.start(t);o.stop(t+beat*0.9);};
+    const bassLine=[80,80,100,80,60,80,80,100]; let bar=0;
+    const sched=()=>{if(stopped)return;const now=ctx.currentTime;for(let i=0;i<4;i++){const t=now+i*beat;kick(t);hat(t+beat*0.5,0.18);hat(t,0.12);if(i===1||i===3)snare(t);bass(t,bassLine[(bar*4+i)%bassLine.length]);}bar++;setTimeout(()=>{if(!stopped)sched();},beat*4*1000-80);};
+    sched();
+    return ()=>{stopped=true;g.gain.linearRampToValueAtTime(0,ctx.currentTime+0.3);};
+  };
+
+  const playLofi = (ctx: AudioContext, m: GainNode) => {
+    const g=ctx.createGain();g.gain.setValueAtTime(0,ctx.currentTime);g.gain.linearRampToValueAtTime(0.65,ctx.currentTime+1);g.connect(m);
+    let stopped=false; const beat=60/90;
+    const chords=[[261,329,392],[220,277,349],[196,247,311],[174,220,277]];
+    const chord=(t:number,freqs:number[],dur:number)=>freqs.forEach(f=>{const o=ctx.createOscillator(),fl=ctx.createBiquadFilter(),e=ctx.createGain();o.type='triangle';o.frequency.value=f;fl.type='lowpass';fl.frequency.value=750;fl.Q.value=1;e.gain.setValueAtTime(0,t);e.gain.linearRampToValueAtTime(0.18,t+0.04);e.gain.exponentialRampToValueAtTime(0.001,t+dur);o.connect(fl);fl.connect(e);e.connect(g);o.start(t);o.stop(t+dur);});
+    const lkick=(t:number)=>{const o=ctx.createOscillator(),e=ctx.createGain();o.frequency.setValueAtTime(80,t);o.frequency.exponentialRampToValueAtTime(0.01,t+0.3);e.gain.setValueAtTime(0.55,t);e.gain.exponentialRampToValueAtTime(0.001,t+0.3);o.connect(e);e.connect(g);o.start(t);o.stop(t+0.3);};
+    const lhat=(t:number,v=0.12)=>{const sz=Math.floor(ctx.sampleRate*0.06),b=ctx.createBuffer(1,sz,ctx.sampleRate),d=b.getChannelData(0);for(let i=0;i<sz;i++)d[i]=Math.random()*2-1;const s=ctx.createBufferSource();s.buffer=b;const f=ctx.createBiquadFilter();f.type='highpass';f.frequency.value=6000;const e=ctx.createGain();e.gain.setValueAtTime(v,t);e.gain.exponentialRampToValueAtTime(0.001,t+0.08);s.connect(f);f.connect(e);e.connect(g);s.start(t);};
+    let bar=0;
+    const sched=()=>{if(stopped)return;const now=ctx.currentTime;chord(now,chords[bar%chords.length],beat*2);chord(now+beat*2,chords[(bar+1)%chords.length],beat*2);for(let i=0;i<4;i++){const t=now+i*beat;if(i===0||i===2)lkick(t);lhat(t+beat*0.5);lhat(t+beat*0.25,0.06);lhat(t+beat*0.75,0.06);}bar++;setTimeout(()=>{if(!stopped)sched();},beat*4*1000-80);};
+    sched();
+    return ()=>{stopped=true;g.gain.linearRampToValueAtTime(0,ctx.currentTime+0.6);};
+  };
+
+  const engines = [playZen, playPower, playRain, playOcean, playLofi];
+
+  const play = (idx: number) => {
+    stopAll();
+    const ctx = getCtx();
+    const master = getMaster(ctx);
+    master.gain.value = vol;
+    stopRef.current = engines[idx](ctx, master);
+    setPlaying(true);
+  };
+
+  const pause = () => { stopAll(); setPlaying(false); };
+
+  const selectTrack = (idx: number) => {
+    setTrack(idx);
+    if (playing) play(idx);
+  };
+
+  const handleVol = (v: number) => {
+    setVol(v);
+    if (masterRef.current) masterRef.current.gain.value = v;
+  };
+
+  useEffect(() => () => { stopAll(); if(ctxRef.current) ctxRef.current.close(); }, []);
+
+  const t = ZEN_TRACKS[track];
+
+  return (
+    <div className="fixed bottom-6 right-5 z-[150] flex flex-col items-end gap-3">
+      {/* Full panel */}
+      {open && (
+        <div className="zen-slide-up glass-panel border border-white/20 rounded-[2rem] p-5 w-72 shadow-2xl">
+          {/* Header */}
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <div className="text-[10px] font-black uppercase tracking-[0.22em] text-sky-300/50">Zen Mode</div>
+              <div className="text-sm font-black text-white">In-App Music</div>
+            </div>
+            <button onClick={()=>setOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-xl glass-ice text-sky-300 hover:text-white border border-white/10 text-xs font-black transition-all active:scale-90">✕</button>
+          </div>
+
+          {/* Now playing */}
+          <div className="mb-4 p-4 rounded-2xl bg-gradient-to-br from-cyan-400/10 to-blue-500/5 border border-cyan-400/20 text-center relative overflow-hidden">
+            <div className="text-3xl mb-1.5 select-none">{t.icon}</div>
+            <div className="text-sm font-black text-white">{t.name}</div>
+            <div className="text-[10px] text-sky-300/55 font-bold uppercase tracking-widest mt-0.5">{t.desc}</div>
+            {/* Equalizer bars */}
+            <div className={`flex gap-[3px] justify-center items-end mt-3 h-7 ${!playing ? 'opacity-0' : ''}`}>
+              {['eq-bar-1','eq-bar-2','eq-bar-3','eq-bar-4','eq-bar-5'].map(cls => (
+                <div key={cls} className={`w-[5px] bg-cyan-400 rounded-full ${cls}`} style={{height:'6px'}} />
+              ))}
+            </div>
+          </div>
+
+          {/* Controls */}
+          <div className="flex justify-center items-center gap-4 mb-5">
+            <button onClick={()=>selectTrack((track-1+ZEN_TRACKS.length)%ZEN_TRACKS.length)} className="w-9 h-9 flex items-center justify-center rounded-full glass-ice text-sky-300 hover:text-white border border-white/10 active:scale-90 transition-all text-base">⏮</button>
+            <button
+              onClick={()=>playing ? pause() : play(track)}
+              className={`w-13 h-13 w-12 h-12 rounded-full flex items-center justify-center text-lg font-black transition-all active:scale-95 ${playing ? 'bg-rose-500 border border-rose-400/50 text-white hover:bg-rose-400 zen-pulse-ring' : 'bg-cyan-400 text-slate-900 hover:bg-cyan-300'}`}
+            >
+              {playing ? '⏸' : '▶'}
+            </button>
+            <button onClick={()=>selectTrack((track+1)%ZEN_TRACKS.length)} className="w-9 h-9 flex items-center justify-center rounded-full glass-ice text-sky-300 hover:text-white border border-white/10 active:scale-90 transition-all text-base">⏭</button>
+          </div>
+
+          {/* Volume */}
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-sm select-none">🔉</span>
+            <input type="range" min={0} max={1} step={0.01} value={vol} onChange={e=>handleVol(parseFloat(e.target.value))} className="flex-1 zen-volume" />
+            <span className="text-sm select-none">🔊</span>
+          </div>
+
+          {/* Track list */}
+          <div className="space-y-1.5">
+            {ZEN_TRACKS.map((tr, idx) => (
+              <button key={tr.id} onClick={()=>selectTrack(idx)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left ${track===idx ? 'bg-cyan-400/15 border border-cyan-400/30 text-white' : 'glass-ice border border-white/8 text-sky-200/70 hover:text-white hover:border-white/20'}`}
+              >
+                <span className="text-base select-none">{tr.icon}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-black truncate">{tr.name}</div>
+                  <div className="text-[10px] text-sky-300/50 font-bold">{tr.desc}</div>
+                </div>
+                {track===idx && playing && <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shrink-0" />}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Floating toggle pill */}
+      <button
+        id="zen-mode-toggle"
+        onClick={()=>setOpen(!open)}
+        className={`flex items-center gap-2.5 px-4 py-3 rounded-2xl glass-panel border shadow-2xl hover:border-cyan-400/60 transition-all active:scale-95 ${playing ? 'border-cyan-400/40 zen-pulse-ring' : 'border-white/20'}`}
+      >
+        <div className={`w-7 h-7 rounded-xl bg-cyan-400/15 border border-cyan-400/25 flex items-center justify-center text-base select-none ${playing ? 'animate-pulse' : ''}`}>
+          {playing ? t.icon : '🎵'}
+        </div>
+        <div className="text-left">
+          <div className="text-[10px] font-black uppercase tracking-[0.2em] text-sky-300/60">Zen Mode</div>
+          {playing && <div className="text-[10px] font-bold text-cyan-300 leading-tight">{t.name}</div>}
+        </div>
+      </button>
+    </div>
+  );
+};
+// ────────────────────────────────────────────────────────────────────────────
+
 export default function App() {
   const [activeLevel, setActiveLevel] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('warmup');
@@ -2478,6 +2686,7 @@ export default function App() {
 
           </main>
         </div>
+        <ZenPlayer />
       </div>
     );
   }
@@ -2858,6 +3067,8 @@ export default function App() {
         <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 relative z-10">
           {activeTabData ? activeTabData.render() : null}
         </main>
+
+        <ZenPlayer />
 
         {/* SW UPDATE TOAST */}
         {needRefresh && (
