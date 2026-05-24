@@ -2555,9 +2555,12 @@ export default function App() {
               <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-32 bg-cyan-400/10 blur-[90px] rounded-full pointer-events-none"></div>
 
               {/* Elevated and highlighted brand logo */}
-              <h1 className="text-6xl sm:text-8xl font-black tracking-tighter leading-none text-white drop-shadow-[0_12px_24px_rgba(34,211,238,0.15)] uppercase select-none">
-                Burn<span className="text-cyan-400 font-extrabold relative inline-block drop-shadow-[0_0_40px_rgba(34,211,238,0.45)]">out</span>
-              </h1>
+              <div className="flex items-center justify-center gap-3 sm:gap-6">
+                <img src="/icons/icon-512.png" alt="BurnOut Fire Logo" className="w-16 h-16 sm:w-24 sm:h-24 object-contain drop-shadow-[0_0_25px_rgba(34,211,238,0.4)] hover:scale-110 transition-transform duration-500" />
+                <h1 className="text-6xl sm:text-8xl font-black tracking-tighter leading-none text-white drop-shadow-[0_12px_24px_rgba(34,211,238,0.15)] uppercase select-none">
+                  Burn<span className="text-cyan-400 font-extrabold relative inline-block drop-shadow-[0_0_40px_rgba(34,211,238,0.45)]">out</span>
+                </h1>
+              </div>
 
               <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white leading-tight max-w-2xl mx-auto pt-2">
                 Train smart, Stay <span className="relative inline-block px-1 text-cyan-300 font-black">
