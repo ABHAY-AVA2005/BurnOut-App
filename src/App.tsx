@@ -1432,52 +1432,51 @@ const ExerciseCard = ({ exercise, onRemove, sequenceState = 'idle', onSequenceCo
   const isResting = phase === 'rest';
 
   return (
-    <div ref={cardRef} className={`backdrop-blur-xl border transition-all duration-500 rounded-3xl p-4 sm:p-5 shadow-sm
-      ${isDarkMode ? 'glass-panel text-white' : 'glass-panel-light text-[#37352f]'}
+    <div ref={cardRef} className={`backdrop-blur-xl border transition-all duration-500 rounded-3xl p-4 sm:p-5 shadow-lg glass-panel text-white
       ${sequenceState !== 'idle' && !isResting ? `${activeGlow || 'neon-glow-orange-active'} scale-[1.02]`
         : sequenceState !== 'idle' && isResting ? 'neon-glow-emerald-active scale-[1.02]'
-          : 'hover:border-neutral-500/30'}`}>
+          : 'hover:border-white/20'}`}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex-1 flex items-start sm:items-center justify-between">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Activity className={`w-5 h-5 ${isResting ? 'text-emerald-600 animate-pulse' : 'text-amber-700'}`} />
-              <h3 className={`text-base sm:text-lg font-bold tracking-tight leading-tight ${isResting ? 'text-emerald-700 dark:text-emerald-400' : 'text-[#37352f] dark:text-gray-100'}`}>
+            <div className="flex items-center gap-2.5 mb-1.5">
+              <Activity className={`w-5 h-5 ${isResting ? 'text-emerald-400 animate-pulse' : 'text-cyan-400'}`} />
+              <h3 className={`text-base sm:text-lg font-black tracking-tight leading-tight ${isResting ? 'text-emerald-400' : 'text-white'}`}>
                 {isResting ? 'Rest & Recover' : exercise.name}
               </h3>
             </div>
-            <p className={`font-semibold text-xs sm:text-sm ${isResting ? 'text-emerald-600/80' : 'text-[#6B7280] dark:text-gray-400'}`}>
-              {isResting ? 'Breathe deeply. Prepare for next.' : <>Target: <span className="text-amber-700 dark:text-amber-500 font-black">{exercise.reps}</span></>}
+            <p className={`font-bold text-xs sm:text-sm ${isResting ? 'text-emerald-400/80' : 'text-sky-200/60'}`}>
+              {isResting ? 'Breathe deeply. Prepare for next.' : <>Target: <span className="text-cyan-400 font-black">{exercise.reps}</span></>}
             </p>
           </div>
           {!exercise.isCore && (
-            <button onClick={onRemove} className="p-2 sm:ml-4 text-rose-600 hover:bg-rose-500/10 rounded-full transition-colors flex-shrink-0">
+            <button onClick={onRemove} className="p-2 sm:ml-4 text-rose-400 hover:bg-rose-500/10 rounded-full transition-colors flex-shrink-0">
               <Trash2 className="w-4 h-4" />
             </button>
           )}
         </div>
 
-        <div className={`flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end rounded-2xl p-2 border-2 transition-colors ${isResting ? 'bg-emerald-100/60 dark:bg-emerald-900/40 border-emerald-600' : 'bg-white/80 dark:bg-black/60 border-white/80 dark:border-white/20'}`}>
-          <div className={`font-mono text-lg sm:text-2xl w-16 sm:w-20 text-center font-black tracking-tight ${timeLeft === 0 ? 'text-rose-600' : isResting ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-700 dark:text-amber-500'}`}>
+        <div className={`flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end rounded-2xl p-2.5 border transition-all duration-300 ${isResting ? 'bg-emerald-950/40 border-emerald-500/40' : 'bg-slate-950/40 border-white/10'}`}>
+          <div className={`font-mono text-lg sm:text-2xl w-16 sm:w-20 text-center font-black tracking-tight ${timeLeft === 0 ? 'text-rose-400' : isResting ? 'text-emerald-400' : 'text-cyan-300'}`}>
             {formatTime(timeLeft)}
           </div>
 
           <div className="flex items-center gap-1.5">
-            <button onClick={() => setIsRunning(!isRunning)} className={`p-2.5 sm:p-3 rounded-xl transition-all shadow-sm flex-shrink-0 ${isRunning ? 'bg-rose-500/10 text-rose-600 hover:bg-rose-500/20' : isResting ? 'bg-emerald-600/10 text-emerald-700 hover:bg-emerald-600/20' : 'bg-amber-600/10 text-amber-700 hover:bg-amber-600/20'}`}>
+            <button onClick={() => setIsRunning(!isRunning)} className={`p-2.5 sm:p-3 rounded-xl transition-all shadow-md flex-shrink-0 border ${isRunning ? 'bg-rose-500/10 border-rose-500/30 text-rose-400 hover:bg-rose-500/20' : isResting ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20' : 'bg-cyan-400/10 border-cyan-400/30 text-cyan-300 hover:bg-cyan-400/20'}`}>
               {isRunning ? <Pause className="w-4 h-4 sm:w-5 sm:h-5" /> : <Play className="w-4 h-4 sm:w-5 sm:h-5 ml-0.5" />}
             </button>
 
             {sequenceState !== 'idle' ? (
               <button
                 onClick={handleSkip}
-                className="p-2.5 sm:p-3 rounded-xl bg-amber-600/10 text-amber-700 hover:bg-amber-600/20 transition-all flex-shrink-0 flex items-center justify-center gap-1 shadow-sm"
+                className="p-2.5 sm:p-3 rounded-xl bg-cyan-400/10 border border-cyan-400/30 text-cyan-300 hover:bg-cyan-400/20 transition-all flex-shrink-0 flex items-center justify-center gap-1 shadow-md"
                 title={isResting ? "Skip Rest" : "Skip Exercise"}
               >
                 <FastForward className="w-4 h-4 sm:w-5 sm:h-5" />
                 {isResting && <span className="text-xs font-black mr-1 hidden sm:inline tracking-tighter">SKIP</span>}
               </button>
             ) : (
-              <button onClick={() => { setIsRunning(false); setPhase('work'); setTimeLeft(exercise.time); }} className="p-2.5 sm:p-3 rounded-xl bg-black/5 text-[#555555] dark:bg-white/5 dark:text-gray-300 hover:bg-black/10 transition-colors flex-shrink-0 border-2 border-transparent">
+              <button onClick={() => { setIsRunning(false); setPhase('work'); setTimeLeft(exercise.time); }} className="p-2.5 sm:p-3 rounded-xl bg-white/5 border border-white/10 text-sky-200 hover:bg-white/10 transition-colors flex-shrink-0">
                 <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             )}
@@ -1485,16 +1484,16 @@ const ExerciseCard = ({ exercise, onRemove, sequenceState = 'idle', onSequenceCo
         </div>
       </div>
 
-      <div className="mt-4 border-t-2 border-black/5 dark:border-white/10 pt-3">
-        <button onClick={() => setShowForm(!showForm)} className="flex items-center gap-2 text-sm text-[#4B5563] dark:text-gray-300 hover:text-amber-700 transition-colors w-full group py-1">
+      <div className="mt-4 border-t border-white/10 pt-3">
+        <button onClick={() => setShowForm(!showForm)} className="flex items-center gap-2 text-sm text-sky-200/60 hover:text-cyan-400 transition-colors w-full group py-1">
           {showForm ? <ChevronUp className="w-4 h-4 group-hover:scale-110" /> : <ChevronDown className="w-4 h-4 group-hover:scale-110" />}
-          <span className="font-bold text-xs sm:text-sm tracking-widest uppercase">Form Guide</span>
+          <span className="font-black text-xs tracking-widest uppercase">Form Guide</span>
         </button>
         {showForm && exercise.form && (
           <ul className="mt-3 space-y-2 pl-2 animate-in slide-in-from-top-1 duration-200">
             {exercise.form.map((step, idx) => (
-              <li key={idx} className="flex items-start gap-2 text-xs sm:text-sm font-semibold text-[#374151] dark:text-gray-200">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
+              <li key={idx} className="flex items-start gap-2 text-xs sm:text-sm font-semibold text-sky-200/80">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" />
                 <span>{step}</span>
               </li>
             ))}
@@ -2054,24 +2053,27 @@ export default function App() {
     return (
       <div className="space-y-6 sm:space-y-8">
         {title && (
-          <div className="bg-white/90 dark:bg-[#1e293b]/80 backdrop-blur-xl border-2 border-white/80 dark:border-white/10 rounded-[2rem] p-6 sm:p-8 text-center shadow-2xl transition-all duration-300">
-            <h2 className="text-2xl sm:text-4xl font-black text-[#37352f] dark:text-gray-100 tracking-tighter leading-none">{title}</h2>
-            {focus && <p className="text-[#6B7280] dark:text-gray-400 mt-3 text-sm sm:text-lg font-bold tracking-tight">{focus}</p>}
+          <div className="glass-panel border border-white/15 rounded-[2.5rem] p-6 sm:p-10 text-center shadow-2xl relative overflow-hidden transition-all duration-300">
+            {/* Ambient neon backglow */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-24 bg-cyan-400/8 blur-[60px] rounded-full pointer-events-none"></div>
+
+            <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tighter leading-none uppercase drop-shadow-[0_2px_10px_rgba(255,255,255,0.08)]">{title}</h2>
+            {focus && <p className="text-sky-200/60 mt-3.5 text-xs sm:text-sm font-black uppercase tracking-widest leading-relaxed max-w-2xl mx-auto">{focus}</p>}
 
             {/* PERFORMANCE METRICS CARD WITHIN SECTION */}
             {levelData?.metrics && (
-              <div className="mt-8 pt-6 border-t-2 border-black/5 dark:border-white/5 flex flex-wrap justify-center gap-4 sm:gap-8">
-                <div className="flex items-center gap-2">
-                  <Activity className={`w-5 h-5 ${theme.text}`} />
-                  <span className={`text-sm font-black uppercase tracking-tighter ${theme.text}`}>{levelData.metrics.met} MET</span>
+              <div className="mt-8 pt-6 border-t border-white/10 flex flex-wrap justify-center gap-4 sm:gap-6">
+                <div className="flex items-center gap-2 bg-white/5 border border-white/8 px-4 py-2 rounded-xl text-sky-200">
+                  <Activity className="w-4 h-4 text-cyan-400" />
+                  <span className="text-xs font-black uppercase tracking-widest text-cyan-300">{levelData.metrics.met} MET</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Timer className={`w-5 h-5 ${theme.text}`} />
-                  <span className={`text-sm font-black uppercase tracking-tighter ${theme.text}`}>{levelData.metrics.time}</span>
+                <div className="flex items-center gap-2 bg-white/5 border border-white/8 px-4 py-2 rounded-xl text-sky-200">
+                  <Timer className="w-4 h-4 text-cyan-400" />
+                  <span className="text-xs font-black uppercase tracking-widest text-cyan-300">{levelData.metrics.time}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Flame className={`w-5 h-5 ${theme.text}`} />
-                  <span className={`text-sm font-black uppercase tracking-tighter ${theme.text}`}>{levelData.metrics.calories} / SESSION</span>
+                <div className="flex items-center gap-2 bg-white/5 border border-white/8 px-4 py-2 rounded-xl text-sky-200">
+                  <Flame className="w-4 h-4 text-cyan-400" />
+                  <span className="text-xs font-black uppercase tracking-widest text-cyan-300">{levelData.metrics.calories} / SESSION</span>
                 </div>
               </div>
             )}
@@ -2084,8 +2086,8 @@ export default function App() {
               <button
                 onClick={() => toggleSequence(sectionId)}
                 className={`py-4 px-8 rounded-2xl font-black text-sm sm:text-base flex items-center justify-center gap-3 transition-all shadow-xl hover:scale-105 active:scale-95 w-full sm:w-auto ${isThisTabSequencing
-                  ? `${theme.bgLight} ${theme.textColor} border-2 ${theme.border} shadow-lg`
-                  : `${theme.bg} text-white shadow-lg`
+                  ? 'bg-cyan-400/15 border border-cyan-400/40 text-cyan-300 shadow-inner'
+                  : 'bg-cyan-400 hover:bg-cyan-300 text-slate-900 shadow-lg shadow-cyan-400/20'
                   }`}
               >
                 {isThisTabSequencing ? (sequence.isPaused ? <Play className="w-5 h-5" /> : <Pause className="w-5 h-5" />) : <Rocket className="w-5 h-5" />}
@@ -2095,7 +2097,7 @@ export default function App() {
               {isThisTabSequencing && (
                 <button
                   onClick={stopSequence}
-                  className="py-4 px-8 rounded-2xl font-black text-sm sm:text-base flex items-center justify-center gap-3 transition-all bg-rose-600/10 text-rose-700 border-2 border-rose-600 shadow-xl w-full sm:w-auto hover:bg-rose-600/20"
+                  className="py-4 px-8 rounded-2xl font-black text-sm sm:text-base flex items-center justify-center gap-3 transition-all bg-rose-500/15 text-rose-400 border border-rose-500/35 hover:bg-rose-500/25 shadow-xl w-full sm:w-auto"
                 >
                   <Square className="w-5 h-5" />
                   STOP
@@ -2104,7 +2106,7 @@ export default function App() {
 
               <button
                 onClick={resetAllTimers}
-                className="py-4 px-8 rounded-2xl font-black text-sm sm:text-base flex items-center justify-center gap-3 transition-all bg-white/80 dark:bg-white/10 text-[#37352f] dark:text-gray-200 border-2 border-white/80 dark:border-white/10 hover:bg-[#FAF9F6] shadow-xl w-full sm:w-auto"
+                className="py-4 px-8 rounded-2xl font-black text-sm sm:text-base flex items-center justify-center gap-3 transition-all glass-ice hover:bg-white/12 text-sky-200 border border-white/15 shadow-xl w-full sm:w-auto"
               >
                 <RotateCcw className="w-5 h-5" />
                 RESET ALL
