@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { Play, Pause, RotateCcw, CheckCircle2, ChevronDown, ChevronUp, Activity, Apple, Flame, Plus, Trash2, Rocket, FastForward, Leaf, Sun, Moon, Search, Square, Download, ChevronLeft, Shield, TrendingUp, Zap, Footprints, Palette, Timer, BarChart3, Sparkles, Loader2, Menu, Mic, Send, User, Dumbbell, Brain, Scale, Heart } from 'lucide-react';
-
+import runnerImg from './assets/runner_overlay.png';
+import morningRunImg from './assets/morning_run.png';
 const playBeep = () => {
   try {
     const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
@@ -2576,7 +2577,7 @@ export default function App() {
               {/* IMAGE 1: INFERNO SPRINT */}
               <div className="relative h-96 sm:h-[26rem] rounded-[2.5rem] overflow-hidden shadow-2xl group border border-white/15 hover:scale-[1.015] hover:border-cyan-400/30 transition-all duration-500 glass-ice">
                 <img
-                  src="/src/assets/runner_overlay.png"
+                  src={runnerImg}
                   className="absolute inset-0 w-full h-full object-cover object-top opacity-95 group-hover:scale-105 group-hover:object-[center_10%] transition-all duration-[1400ms] ease-out"
                   alt="Athlete sprinting"
                 />
@@ -2602,7 +2603,7 @@ export default function App() {
               {/* IMAGE 2: ENDURANCE CARDIO */}
               <div className="relative h-96 sm:h-[26rem] rounded-[2.5rem] overflow-hidden shadow-2xl group border border-white/15 hover:scale-[1.015] hover:border-cyan-400/30 transition-all duration-500 glass-ice">
                 <img
-                  src="/src/assets/morning_run.png"
+                  src={morningRunImg}
                   className="absolute inset-0 w-full h-full object-cover object-top opacity-92 group-hover:scale-105 group-hover:object-[center_8%] transition-all duration-[1400ms] ease-out"
                   alt="Morning outdoor run"
                 />
