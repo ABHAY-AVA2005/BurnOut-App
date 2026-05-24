@@ -1651,6 +1651,43 @@ export default function App() {
   const [imageSearch, setImageSearch] = useState('');
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
+  // PWA installation states
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isInstallable, setIsInstallable] = useState(false);
+  const [showInstallGuide, setShowInstallGuide] = useState(false);
+
+  // Track PWA install prompt
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setIsInstallable(true);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    
+    // Check if running in standalone mode already
+    if (window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone) {
+      setIsInstallable(false);
+    }
+    
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallApp = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+        setIsInstallable(false);
+      }
+    } else {
+      setShowInstallGuide(true);
+    }
+  };
+
   // Track online/offline status
   useEffect(() => {
     const goOnline = () => setIsOnline(true);
@@ -2141,16 +2178,24 @@ export default function App() {
           {/* GLOBAL NAVIGATION HEADER */}
           <header className={`max-w-6xl mx-auto px-6 flex justify-between items-center relative z-20 ${!isOnline ? 'pt-14' : 'pt-6'}`}>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full glass-ice border border-white/20 flex items-center justify-center text-cyan-200">
-                <ChevronLeft className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-full glass-ice border border-white/20 flex items-center justify-center text-cyan-300">
+                <Flame className="w-5 h-5 animate-pulse" />
               </div>
             </div>
 
-            <div className="px-5 py-2 rounded-full glass-ice border border-white/20 text-xs sm:text-sm font-black  tracking-widest text-cyan-100 shadow-sm">
-              BurnOut
+            <div className="px-5 py-2 rounded-full glass-ice border border-white/20 text-xs sm:text-sm font-black tracking-widest text-cyan-100 shadow-sm uppercase">
+              BurnOut · PWA
             </div>
 
             <div className="flex gap-3">
+              <button
+                onClick={handleInstallApp}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-400 hover:bg-cyan-300 text-slate-900 text-xs font-black transition-all shadow-lg shadow-cyan-400/20 active:scale-95 border border-cyan-300/30"
+              >
+                <Download className="w-4 h-4 animate-bounce" />
+                <span className="hidden sm:inline">INSTALL APP</span>
+                <span className="sm:hidden">INSTALL</span>
+              </button>
               <ThemePicker bgTheme={bgTheme} setBgTheme={setBgTheme} />
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
@@ -2164,16 +2209,41 @@ export default function App() {
           <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col items-center relative z-10">
 
             {/* HERO SECTION */}
-            <div className="mb-10 text-center space-y-3">
-              <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-white leading-none drop-shadow-lg">
+            <div className="mb-14 text-center space-y-4 relative w-full max-w-4xl flex flex-col items-center">
+              {/* Decorative premium glow under the logo */}
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-32 bg-cyan-400/10 blur-[90px] rounded-full pointer-events-none"></div>
+
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-ice border border-cyan-400/20 text-[10px] font-black uppercase tracking-[0.25em] text-cyan-300 mb-2">
+                <Flame className="w-3.5 h-3.5 text-cyan-400 animate-pulse" /> PWA Training Platform
+              </div>
+
+              {/* Elevated and highlighted brand logo */}
+              <h1 className="text-6xl sm:text-8xl font-black tracking-tighter leading-none text-white drop-shadow-[0_12px_24px_rgba(34,211,238,0.15)] uppercase select-none">
+                Burn<span className="text-cyan-400 font-extrabold relative inline-block drop-shadow-[0_0_40px_rgba(34,211,238,0.45)]">out</span>
+              </h1>
+
+              <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white leading-tight max-w-2xl mx-auto pt-2">
                 Train smart, Stay <span className="relative inline-block px-1 text-cyan-300 font-black">
                   strong
                   <svg className="absolute left-0 bottom-[-4px] w-full h-[6px] text-cyan-400" viewBox="0 0 100 10" preserveAspectRatio="none">
                     <path d="M0,5 Q50,9 100,5 Q50,1 0,5" fill="currentColor" opacity="0.7" />
                   </svg>
                 </span>, Perform better
-              </h1>
-              <p className="text-sm font-bold text-sky-200/70 uppercase tracking-widest">Elite Discipline · Zero Excuses</p>
+              </h2>
+
+              <p className="text-xs font-black text-sky-300/50 uppercase tracking-[0.3em] pt-1">Elite Discipline · Zero Excuses</p>
+
+              {/* PWA Direct Download Banner */}
+              <div className="pt-6 max-w-md mx-auto w-full">
+                <button
+                  onClick={handleInstallApp}
+                  className="w-full sm:w-auto font-black py-4 px-8 rounded-2xl bg-gradient-to-r from-cyan-400 to-sky-400 hover:from-cyan-300 hover:to-sky-300 text-slate-900 shadow-2xl shadow-cyan-400/20 hover:shadow-cyan-400/40 active:scale-95 transition-all flex items-center justify-center gap-3 border border-cyan-300/30"
+                >
+                  <Download className="w-5 h-5" />
+                  <span className="tracking-tight uppercase">DOWNLOAD BURNOUT PWA APP</span>
+                </button>
+                <p className="text-[10px] font-bold text-sky-300/40 uppercase tracking-widest mt-2">Fully offline capable · Add to home screen instantly</p>
+              </div>
             </div>
 
             {/* ATHLETIC SPLIT IMAGE HEADERS */}
@@ -2784,6 +2854,74 @@ export default function App() {
         <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 relative z-10">
           {activeTabData ? activeTabData.render() : null}
         </main>
+
+        {/* PWA INSTALLATION GUIDE MODAL */}
+        {showInstallGuide && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+            <div className="glass-panel border border-white/20 max-w-md w-full rounded-[2.5rem] p-6 sm:p-8 relative shadow-2xl text-left glass-shimmer">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-cyan-400/10 blur-3xl rounded-full -mr-16 -mt-16 pointer-events-none"></div>
+              
+              <div className="flex justify-between items-start mb-6">
+                <div className="p-3 rounded-2xl bg-cyan-400/15 border border-cyan-400/25 text-cyan-300">
+                  <Download className="w-6 h-6" />
+                </div>
+                <button
+                  onClick={() => setShowInstallGuide(false)}
+                  className="p-2 rounded-full glass-ice text-sky-200 hover:text-white border border-white/10 active:scale-90 transition-all text-sm font-black w-8 h-8 flex items-center justify-center"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <h3 className="text-2xl font-black text-white tracking-tight uppercase mb-2">Install BurnOut PWA</h3>
+              <p className="text-sky-200/70 text-xs font-bold leading-relaxed mb-6">
+                Install BurnOut on your device for absolute offline speed, quick access from your home screen, and elite full-screen tracking.
+              </p>
+
+              <div className="space-y-4">
+                {/* iOS Instructions */}
+                <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex gap-4">
+                  <span className="text-2xl shrink-0">🍏</span>
+                  <div>
+                    <h4 className="text-sm font-black text-white uppercase tracking-tight">iOS / Apple Safari</h4>
+                    <p className="text-[11px] text-sky-200/60 font-bold mt-1 leading-relaxed">
+                      Tap the <strong className="text-cyan-300">Share</strong> button at the bottom navigation bar, then select <strong className="text-cyan-300">Add to Home Screen</strong>.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Android / Chrome Instructions */}
+                <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex gap-4">
+                  <span className="text-2xl shrink-0">🤖</span>
+                  <div>
+                    <h4 className="text-sm font-black text-white uppercase tracking-tight">Android / Google Chrome</h4>
+                    <p className="text-[11px] text-sky-200/60 font-bold mt-1 leading-relaxed">
+                      Tap the <strong className="text-cyan-300">three dots menu</strong> next to the address bar, then select <strong className="text-cyan-300">Install App</strong>.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Desktop Instructions */}
+                <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex gap-4">
+                  <span className="text-2xl shrink-0">💻</span>
+                  <div>
+                    <h4 className="text-sm font-black text-white uppercase tracking-tight">Mac / Windows Desktop</h4>
+                    <p className="text-[11px] text-sky-200/60 font-bold mt-1 leading-relaxed">
+                      Click the <strong className="text-cyan-300">Install Monitor icon</strong> on the right side of the URL address bar at the top of your browser.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowInstallGuide(false)}
+                className="w-full mt-6 py-4 rounded-2xl bg-cyan-400 hover:bg-cyan-300 text-slate-900 font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95"
+              >
+                GOT IT, LET'S DO IT
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
