@@ -1641,11 +1641,11 @@ const CardioView = () => {
 
 // ─── ZEN MUSIC PLAYER ──────────────────────────────────────────────────────
 const ZEN_TRACKS = [
-  { id: 'zen',   name: 'Deep Meditation',     desc: 'Ambient Chimes · Pad',  icon: '🧘' },
-  { id: 'power', name: 'Iron Gym Beats',  desc: '128 BPM · Hard Bass',   icon: '⚡' },
-  { id: 'rain',  name: 'Rain Focus',   desc: 'Pink Noise · Calm',   icon: '🌧️' },
-  { id: 'ocean', name: 'Ocean Waves',  desc: 'Wave Tone · Deep',    icon: '🌊' },
-  { id: 'lofi',  name: 'Lofi Chill',  desc: '90 BPM · Beats',      icon: '🎵' },
+  { id: 'power',  name: 'Iron Gym Beats',   desc: '128 BPM · Hard Bass', icon: '⚡' },
+  { id: 'trap',   name: 'Trap Workout',     desc: '140 BPM · 808s',      icon: '🔥' },
+  { id: 'synth',  name: 'Cyberpunk Synth',  desc: '115 BPM · Dark',      icon: '🤖' },
+  { id: 'drill',  name: 'Drill Bass',       desc: '144 BPM · Slides',    icon: '🌪️' },
+  { id: 'lofi',   name: 'Lofi Chill',       desc: '90 BPM · Beats',      icon: '🎵' },
 ];
 
 const ZenPlayer = () => {
@@ -1690,71 +1690,132 @@ const ZenPlayer = () => {
   };
 
   /* ── TRACK ENGINES ── */
-  const playZen = (ctx: AudioContext, m: GainNode) => {
-    const g = ctx.createGain(); 
-    g.gain.setValueAtTime(0, ctx.currentTime); 
-    g.gain.linearRampToValueAtTime(0.85, ctx.currentTime + 3); 
-    g.connect(m);
-    
-    // Soft, deep pad drone
-    const oscs: OscillatorNode[] = [];
-    [[108, 0.3], [110, 0.3], [216, 0.15], [324, 0.1], [432, 0.1], [434, 0.1], [648, 0.05]].forEach(([f, v]) => {
-      const o = ctx.createOscillator(), og = ctx.createGain(), fl = ctx.createBiquadFilter();
-      o.type = 'sine'; o.frequency.value = f; 
-      fl.type = 'lowpass'; fl.frequency.value = 600;
-      og.gain.value = v;
-      o.connect(fl); fl.connect(og); og.connect(g); o.start(); oscs.push(o);
-    });
-    
-    // Slow evolving filter sweep
-    const lfo = ctx.createOscillator(), lg = ctx.createGain();
-    lfo.frequency.value = 0.05; lg.gain.value = 0.15;
-    lfo.connect(lg); lg.connect(g.gain); lfo.start();
-    
-    // Random meditative bell chimes
-    let stopped = false;
-    const bell = (t: number, f: number) => {
-      const o = ctx.createOscillator(), eg = ctx.createGain();
-      o.type = 'sine'; o.frequency.value = f;
-      eg.gain.setValueAtTime(0, t);
-      eg.gain.linearRampToValueAtTime(0.3, t + 0.1);
-      eg.gain.exponentialRampToValueAtTime(0.001, t + 6);
-      o.connect(eg); eg.connect(g);
-      o.start(t); o.stop(t + 6.1);
+  const playTrap = (ctx: AudioContext, m: GainNode) => {
+    const g=ctx.createGain();g.gain.setValueAtTime(0,ctx.currentTime);g.gain.linearRampToValueAtTime(0.85,ctx.currentTime+0.5);g.connect(m);
+    let stopped=false; const beat=60/140; 
+    const kick=(t:number)=>{
+      const o=ctx.createOscillator(), e=ctx.createGain();
+      o.frequency.setValueAtTime(100,t); o.frequency.exponentialRampToValueAtTime(0.01,t+0.6);
+      e.gain.setValueAtTime(1,t); e.gain.exponentialRampToValueAtTime(0.001,t+0.6);
+      o.connect(e); e.connect(g); o.start(t); o.stop(t+0.6);
     };
-    const bells = [864, 1296, 1728, 2160];
-    const schedBell = () => {
-      if (stopped) return;
-      bell(ctx.currentTime, bells[Math.floor(Math.random()*bells.length)]);
-      setTimeout(() => { if (!stopped) schedBell() }, (Math.random() * 8000) + 4000);
+    const hat=(t:number,v=0.25)=>{
+      const sz=Math.floor(ctx.sampleRate*0.04),b=ctx.createBuffer(1,sz,ctx.sampleRate),d=b.getChannelData(0);
+      for(let i=0;i<sz;i++) d[i]=Math.random()*2-1;
+      const s=ctx.createBufferSource(); s.buffer=b;
+      const f=ctx.createBiquadFilter(); f.type='highpass'; f.frequency.value=9000;
+      const e=ctx.createGain(); e.gain.setValueAtTime(v,t); e.gain.exponentialRampToValueAtTime(0.001,t+0.04);
+      s.connect(f); f.connect(e); e.connect(g); s.start(t);
     };
-    schedBell();
-    
-    return () => { 
-      stopped = true;
-      g.gain.linearRampToValueAtTime(0, ctx.currentTime + 2); 
-      setTimeout(() => { oscs.forEach(o=>{try{o.stop()}catch(e){}}); try{lfo.stop()}catch(e){} }, 2100); 
+    const snare=(t:number)=>{
+      const sz=Math.floor(ctx.sampleRate*0.15),b=ctx.createBuffer(1,sz,ctx.sampleRate),d=b.getChannelData(0);
+      for(let i=0;i<sz;i++) d[i]=Math.random()*2-1;
+      const s=ctx.createBufferSource(); s.buffer=b;
+      const f=ctx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=2500; f.Q.value=1;
+      const e=ctx.createGain(); e.gain.setValueAtTime(0.8,t); e.gain.exponentialRampToValueAtTime(0.001,t+0.15);
+      s.connect(f); f.connect(e); e.connect(g); s.start(t);
     };
+    let step=0;
+    const sched=()=>{
+      if(stopped)return;
+      const now=ctx.currentTime;
+      for(let i=0;i<4;i++){
+        const t=now+i*beat;
+        if(i===0 || (step%2===1 && i===2)) kick(t);
+        if(i===2) snare(t);
+        hat(t); hat(t+beat*0.5); 
+        if(i===3 && step%4===3) { hat(t+beat*0.25); hat(t+beat*0.75); }
+      }
+      step++;
+      setTimeout(()=>{if(!stopped)sched();},beat*4*1000-80);
+    };
+    sched();
+    return ()=>{stopped=true;g.gain.linearRampToValueAtTime(0,ctx.currentTime+0.3);};
   };
 
-  const playRain = (ctx: AudioContext, m: GainNode) => {
-    const sz = 2 * ctx.sampleRate, buf = ctx.createBuffer(2, sz, ctx.sampleRate);
-    for (let c=0;c<2;c++){const d=buf.getChannelData(c);for(let i=0;i<sz;i++)d[i]=Math.random()*2-1;}
-    const src = ctx.createBufferSource(); src.buffer = buf; src.loop = true;
-    const f = ctx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=1500; f.Q.value=0.5;
-    const g = ctx.createGain(); g.gain.setValueAtTime(0,ctx.currentTime); g.gain.linearRampToValueAtTime(0.75,ctx.currentTime+2);
-    src.connect(f); f.connect(g); g.connect(m); src.start();
-    return () => { g.gain.linearRampToValueAtTime(0,ctx.currentTime+1.5); setTimeout(()=>{try{src.stop()}catch(e){}},1600); };
+  const playSynth = (ctx: AudioContext, m: GainNode) => {
+    const g=ctx.createGain();g.gain.setValueAtTime(0,ctx.currentTime);g.gain.linearRampToValueAtTime(0.7,ctx.currentTime+0.5);g.connect(m);
+    let stopped=false; const beat=60/115;
+    const kick=(t:number)=>{
+      const o=ctx.createOscillator(), e=ctx.createGain();
+      o.frequency.setValueAtTime(120,t); o.frequency.exponentialRampToValueAtTime(0.01,t+0.4);
+      e.gain.setValueAtTime(0.9,t); e.gain.exponentialRampToValueAtTime(0.001,t+0.4);
+      o.connect(e); e.connect(g); o.start(t); o.stop(t+0.4);
+    };
+    const arp=(t:number, f:number)=>{
+      const o=ctx.createOscillator(), e=ctx.createGain(), fl=ctx.createBiquadFilter();
+      o.type='sawtooth'; o.frequency.value=f;
+      fl.type='lowpass'; fl.frequency.setValueAtTime(800, t); fl.frequency.exponentialRampToValueAtTime(100, t+0.2);
+      e.gain.setValueAtTime(0.3,t); e.gain.exponentialRampToValueAtTime(0.001,t+0.2);
+      o.connect(fl); fl.connect(e); e.connect(g); o.start(t); o.stop(t+0.2);
+    };
+    const notes = [220, 261.63, 329.63, 261.63, 220, 196, 220, 329.63];
+    let step=0;
+    const sched=()=>{
+      if(stopped)return;
+      const now=ctx.currentTime;
+      for(let i=0;i<4;i++){
+        const t=now+i*beat;
+        kick(t);
+        for(let j=0;j<4;j++) arp(t+j*beat*0.25, notes[(step*16+i*4+j)%notes.length]);
+      }
+      step++;
+      setTimeout(()=>{if(!stopped)sched();},beat*4*1000-80);
+    };
+    sched();
+    return ()=>{stopped=true;g.gain.linearRampToValueAtTime(0,ctx.currentTime+0.3);};
   };
 
-  const playOcean = (ctx: AudioContext, m: GainNode) => {
-    const sz = 4*ctx.sampleRate, buf = ctx.createBuffer(2, sz, ctx.sampleRate);
-    for(let c=0;c<2;c++){const d=buf.getChannelData(c);let b0=0,b1=0,b2=0;for(let i=0;i<sz;i++){const w=Math.random()*2-1;b0=0.99886*b0+w*0.0555;b1=0.99332*b1+w*0.0751;b2=0.96900*b2+w*0.1539;d[i]=(b0+b1+b2+w*0.0185)*0.18;}}
-    const src=ctx.createBufferSource();src.buffer=buf;src.loop=true;
-    const g=ctx.createGain();g.gain.setValueAtTime(0,ctx.currentTime);g.gain.linearRampToValueAtTime(0.8,ctx.currentTime+2);
-    const lfo=ctx.createOscillator(),lg=ctx.createGain();lfo.frequency.value=0.05;lg.gain.value=0.28;lfo.connect(lg);lg.connect(g.gain);lfo.start();
-    src.connect(g);g.connect(m);src.start();
-    return ()=>{g.gain.linearRampToValueAtTime(0,ctx.currentTime+1.5);setTimeout(()=>{try{src.stop()}catch(e){};try{lfo.stop()}catch(e){}},1600);};
+  const playDrill = (ctx: AudioContext, m: GainNode) => {
+    const g=ctx.createGain();g.gain.setValueAtTime(0,ctx.currentTime);g.gain.linearRampToValueAtTime(0.8,ctx.currentTime+0.5);g.connect(m);
+    let stopped=false; const beat=60/144;
+    const kick=(t:number)=>{
+      const o=ctx.createOscillator(), e=ctx.createGain();
+      o.frequency.setValueAtTime(120,t); o.frequency.exponentialRampToValueAtTime(0.01,t+0.3);
+      e.gain.setValueAtTime(1,t); e.gain.exponentialRampToValueAtTime(0.001,t+0.3);
+      o.connect(e); e.connect(g); o.start(t); o.stop(t+0.3);
+    };
+    const bass=(t:number, f:number, dur:number, slideF?:number)=>{
+      const o=ctx.createOscillator(), e=ctx.createGain(), fl=ctx.createBiquadFilter();
+      o.type='triangle'; o.frequency.setValueAtTime(f, t);
+      if(slideF) o.frequency.linearRampToValueAtTime(slideF, t+dur);
+      fl.type='lowpass'; fl.frequency.value=250;
+      e.gain.setValueAtTime(0.9,t); e.gain.linearRampToValueAtTime(0.9, t+dur*0.8); e.gain.exponentialRampToValueAtTime(0.001, t+dur);
+      o.connect(fl); fl.connect(e); e.connect(g); o.start(t); o.stop(t+dur);
+    };
+    const hat=(t:number)=>{
+      const sz=Math.floor(ctx.sampleRate*0.03),b=ctx.createBuffer(1,sz,ctx.sampleRate),d=b.getChannelData(0);
+      for(let i=0;i<sz;i++) d[i]=Math.random()*2-1;
+      const s=ctx.createBufferSource(); s.buffer=b;
+      const f=ctx.createBiquadFilter(); f.type='highpass'; f.frequency.value=10000;
+      const e=ctx.createGain(); e.gain.setValueAtTime(0.3,t); e.gain.exponentialRampToValueAtTime(0.001,t+0.03);
+      s.connect(f); f.connect(e); e.connect(g); s.start(t);
+    };
+    const snare=(t:number)=>{
+      const sz=Math.floor(ctx.sampleRate*0.1),b=ctx.createBuffer(1,sz,ctx.sampleRate),d=b.getChannelData(0);
+      for(let i=0;i<sz;i++) d[i]=Math.random()*2-1;
+      const s=ctx.createBufferSource(); s.buffer=b;
+      const f=ctx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=3000; f.Q.value=1;
+      const e=ctx.createGain(); e.gain.setValueAtTime(0.8,t); e.gain.exponentialRampToValueAtTime(0.001,t+0.1);
+      s.connect(f); f.connect(e); e.connect(g); s.start(t);
+    };
+    
+    let step=0;
+    const sched=()=>{
+      if(stopped)return;
+      const now=ctx.currentTime;
+      for(let i=0;i<4;i++){
+        const t=now+i*beat;
+        if(i===2) snare(t+beat*0.5); 
+        if(i===0) { kick(t); bass(t, 49, beat*1.5); }
+        if(i===3 && step%2===1) { kick(t); bass(t, 65, beat*0.5, 49); }
+        hat(t); hat(t+beat*0.5);
+      }
+      step++;
+      setTimeout(()=>{if(!stopped)sched();},beat*4*1000-80);
+    };
+    sched();
+    return ()=>{stopped=true;g.gain.linearRampToValueAtTime(0,ctx.currentTime+0.3);};
   };
 
   const playPower = (ctx: AudioContext, m: GainNode) => {
@@ -1842,7 +1903,7 @@ const ZenPlayer = () => {
     return ()=>{stopped=true;g.gain.linearRampToValueAtTime(0,ctx.currentTime+0.6);};
   };
 
-  const engines = [playZen, playPower, playRain, playOcean, playLofi];
+  const engines = [playPower, playTrap, playSynth, playDrill, playLofi];
 
   const play = (idx: number, asLocal: boolean, tracks: any[]) => {
     stopAll();
@@ -1943,101 +2004,114 @@ const ZenPlayer = () => {
 
       {/* Full panel */}
       {open && (
-        <div className="zen-slide-up bg-[#0b1d35]/95 backdrop-blur-3xl border border-cyan-400/30 rounded-[2rem] p-5 w-[90vw] sm:w-80 max-w-sm shadow-[0_0_40px_rgba(0,0,0,0.5)]">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-4 shrink-0">
-            <div>
-              <div className="text-[10px] font-black uppercase tracking-[0.22em] text-sky-300/50">Zen Mode</div>
-              <div className="text-sm font-black text-white">In-App Music</div>
-            </div>
-            <button onClick={()=>setOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-xl glass-ice text-sky-300 hover:text-white border border-white/10 text-xs font-black transition-all active:scale-90">✕</button>
-          </div>
-
-          {/* Now playing */}
-          <div className="mb-4 p-4 rounded-2xl bg-gradient-to-br from-cyan-400/10 to-blue-500/5 border border-cyan-400/20 text-center relative overflow-hidden shrink-0">
-            <div className="text-3xl mb-1.5 select-none">{t.icon}</div>
-            <div className="text-sm font-black text-white truncate max-w-[200px] mx-auto">{t.name}</div>
-            <div className="text-[10px] text-sky-300/55 font-bold uppercase tracking-widest mt-0.5">{t.desc}</div>
-            {/* Equalizer bars */}
-            <div className={`flex gap-[3px] justify-center items-end mt-3 h-7 ${!playing ? 'opacity-0' : ''}`}>
-              {['eq-bar-1','eq-bar-2','eq-bar-3','eq-bar-4','eq-bar-5'].map(cls => (
-                <div key={cls} className={`w-[5px] bg-cyan-400 rounded-full ${cls}`} style={{height:'6px'}} />
-              ))}
-            </div>
-          </div>
-
-          {/* Controls */}
-          <div className="flex justify-center items-center gap-4 mb-4 shrink-0">
-            <button onClick={handlePrev} className="w-9 h-9 flex items-center justify-center rounded-full glass-ice text-sky-300 hover:text-white border border-white/10 active:scale-90 transition-all text-base">⏮</button>
-            <button
-              onClick={()=>playing ? pause() : play(track, isLocal, isLocal ? localTracks : ZEN_TRACKS)}
-              className={`w-13 h-13 w-12 h-12 rounded-full flex items-center justify-center text-lg font-black transition-all active:scale-95 ${playing ? 'bg-rose-500 border border-rose-400/50 text-white hover:bg-rose-400 zen-pulse-ring' : 'bg-cyan-400 text-slate-900 hover:bg-cyan-300'}`}
-            >
-              {playing ? '⏸' : '▶'}
-            </button>
-            <button onClick={handleNext} className="w-9 h-9 flex items-center justify-center rounded-full glass-ice text-sky-300 hover:text-white border border-white/10 active:scale-90 transition-all text-base">⏭</button>
-          </div>
-
-          {/* Settings (Shuffle / Loop) */}
-          <div className="flex justify-center gap-3 mb-5 shrink-0">
-            <button onClick={()=>setShuffle(!shuffle)} className={`p-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all border ${shuffle ? 'bg-cyan-400/20 border-cyan-400 text-cyan-200' : 'glass-ice border-white/10 text-sky-300/50 hover:text-white'}`}>
-              🔀 Shuffle
-            </button>
-            <button onClick={()=>setLoop(!loop)} className={`p-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all border ${loop ? 'bg-cyan-400/20 border-cyan-400 text-cyan-200' : 'glass-ice border-white/10 text-sky-300/50 hover:text-white'}`}>
-              🔁 Loop
-            </button>
-          </div>
-
-          {/* Volume */}
-          <div className="flex items-center gap-3 mb-4 shrink-0">
-            <span className="text-sm select-none">🔉</span>
-            <input type="range" min={0} max={1} step={0.01} value={vol} onChange={e=>handleVol(parseFloat(e.target.value))} className="flex-1 zen-volume" />
-            <span className="text-sm select-none">🔊</span>
-          </div>
-
-          {/* Scrollable Track list */}
-          <div className="space-y-1.5 overflow-y-auto pr-1 custom-scrollbar max-h-52">
-            
-            {/* Local Music Section */}
-            <div className="flex gap-2 mb-2 sticky top-0 bg-[#0f2a50]/90 backdrop-blur-sm p-1 z-10 rounded-lg">
-              <button onClick={()=>fileInputRef.current?.click()} className="flex-1 py-1.5 rounded-lg glass-ice border border-white/10 text-[10px] font-black uppercase text-sky-200 hover:bg-white/10 transition-all">
-                📄 Select Files
-              </button>
-              <button onClick={()=>folderInputRef.current?.click()} className="flex-1 py-1.5 rounded-lg glass-ice border border-white/10 text-[10px] font-black uppercase text-sky-200 hover:bg-white/10 transition-all">
-                📁 Select Folder
-              </button>
+        <div className="zen-slide-up bg-black/80 backdrop-blur-3xl border-2 border-cyan-400/50 rounded-[2.5rem] p-6 w-[90vw] sm:w-80 max-w-sm shadow-[0_0_60px_rgba(34,211,238,0.3)] relative overflow-hidden group">
+          {/* Cyberpunk grid bg */}
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none mix-blend-overlay"></div>
+          {/* Awesome glow */}
+          <div className="absolute top-[-50px] right-[-50px] w-40 h-40 bg-pink-500/20 blur-[60px] rounded-full pointer-events-none"></div>
+          <div className="absolute bottom-[-50px] left-[-50px] w-40 h-40 bg-cyan-400/20 blur-[60px] rounded-full pointer-events-none"></div>
+          
+          <div className="relative z-10">
+            {/* Header */}
+            <div className="flex justify-between items-center mb-5 shrink-0">
+              <div>
+                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-pink-400 animate-pulse">BurnOut Audio</div>
+                <div className="text-sm font-black text-white uppercase tracking-wider">Beat Machine</div>
+              </div>
+              <button onClick={()=>setOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-xl bg-white/5 hover:bg-rose-500 text-sky-300 hover:text-white border border-white/10 text-xs font-black transition-all active:scale-90 shadow-lg">✕</button>
             </div>
 
-            {localTracks.length > 0 && (
-              <div className="mb-4">
-                <div className="text-[10px] font-black uppercase tracking-widest text-emerald-400 mb-2 pl-1">Local Playlist ({localTracks.length})</div>
-                {localTracks.map((tr, idx) => (
-                  <button key={tr.url} onClick={()=>selectTrack(idx, true)}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left mb-1.5 ${track===idx && isLocal ? 'bg-emerald-500/15 border border-emerald-400/30 text-white' : 'glass-ice border border-white/8 text-sky-200/70 hover:text-white hover:border-white/20'}`}
-                  >
-                    <span className="text-base select-none">🎵</span>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-xs font-black truncate">{tr.name}</div>
-                    </div>
-                    {track===idx && isLocal && playing && <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />}
-                  </button>
+            {/* Now playing */}
+            <div className="mb-5 p-5 rounded-3xl bg-gradient-to-br from-black/60 to-cyan-900/40 border border-cyan-400/40 text-center relative overflow-hidden shrink-0 shadow-[inset_0_0_30px_rgba(34,211,238,0.1)]">
+              {playing && <div className="absolute inset-0 bg-cyan-400/5 animate-pulse pointer-events-none"></div>}
+              <div className="text-4xl mb-2 select-none drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]">{t.icon}</div>
+              <div className="text-base font-black text-white truncate max-w-[200px] mx-auto tracking-tight">{t.name}</div>
+              <div className="text-[10px] text-cyan-300/80 font-black uppercase tracking-[0.2em] mt-1">{t.desc}</div>
+              {/* Equalizer bars */}
+              <div className={`flex gap-1 justify-center items-end mt-4 h-8 ${!playing ? 'opacity-0' : ''}`}>
+                {['eq-bar-1','eq-bar-2','eq-bar-3','eq-bar-4','eq-bar-5'].map(cls => (
+                  <div key={cls} className={`w-1.5 bg-gradient-to-t from-cyan-500 to-pink-500 rounded-full ${cls} shadow-[0_0_8px_rgba(34,211,238,0.8)]`} style={{height:'6px'}} />
                 ))}
               </div>
-            )}
+            </div>
 
-            <div className="text-[10px] font-black uppercase tracking-widest text-cyan-400 mb-2 pl-1">Synthesized Audio</div>
-            {ZEN_TRACKS.map((tr, idx) => (
-              <button key={tr.id} onClick={()=>selectTrack(idx, false)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left mb-1.5 ${track===idx && !isLocal ? 'bg-cyan-400/15 border border-cyan-400/30 text-white' : 'glass-ice border border-white/8 text-sky-200/70 hover:text-white hover:border-white/20'}`}
+            {/* Controls */}
+            <div className="flex justify-center items-center gap-6 mb-6 shrink-0">
+              <button onClick={handlePrev} className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-cyan-400 hover:bg-white/10 hover:text-white border border-cyan-400/20 active:scale-90 transition-all text-base shadow-[0_0_15px_rgba(34,211,238,0.1)] hover:shadow-[0_0_20px_rgba(34,211,238,0.4)]">⏮</button>
+              <button
+                onClick={()=>playing ? pause() : play(track, isLocal, isLocal ? localTracks : ZEN_TRACKS)}
+                className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-black transition-all active:scale-95 shadow-[0_0_30px_rgba(34,211,238,0.4)] ${playing ? 'bg-gradient-to-br from-rose-500 to-pink-600 border border-pink-400 text-white hover:brightness-110 zen-pulse-ring' : 'bg-gradient-to-br from-cyan-400 to-blue-500 text-white hover:brightness-110'}`}
               >
-                <span className="text-base select-none">{tr.icon}</span>
-                <div className="flex-1 min-w-0">
-                  <div className="text-xs font-black truncate">{tr.name}</div>
-                  <div className="text-[10px] text-sky-300/50 font-bold">{tr.desc}</div>
-                </div>
-                {track===idx && !isLocal && playing && <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shrink-0" />}
+                {playing ? '⏸' : '▶'}
               </button>
-            ))}
+              <button onClick={handleNext} className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-cyan-400 hover:bg-white/10 hover:text-white border border-cyan-400/20 active:scale-90 transition-all text-base shadow-[0_0_15px_rgba(34,211,238,0.1)] hover:shadow-[0_0_20px_rgba(34,211,238,0.4)]">⏭</button>
+            </div>
+
+            {/* Settings (Shuffle / Loop) */}
+            <div className="flex justify-center gap-3 mb-6 shrink-0">
+              <button onClick={()=>setShuffle(!shuffle)} className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border ${shuffle ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_10px_rgba(34,211,238,0.2)]' : 'bg-black/20 border-white/10 text-white/40 hover:text-white'}`}>
+                🔀 Shuffle
+              </button>
+              <button onClick={()=>setLoop(!loop)} className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border ${loop ? 'bg-pink-500/20 border-pink-400 text-pink-300 shadow-[0_0_10px_rgba(236,72,153,0.2)]' : 'bg-black/20 border-white/10 text-white/40 hover:text-white'}`}>
+                🔁 Loop
+              </button>
+            </div>
+
+            {/* Volume */}
+            <div className="flex items-center gap-3 mb-5 shrink-0 bg-black/30 p-3 rounded-2xl border border-white/5">
+              <span className="text-sm select-none opacity-60">🔉</span>
+              <input type="range" min={0} max={1} step={0.01} value={vol} onChange={e=>handleVol(parseFloat(e.target.value))} className="flex-1 zen-volume" />
+              <span className="text-sm select-none opacity-60">🔊</span>
+            </div>
+
+            {/* Scrollable Track list */}
+            <div className="space-y-2 overflow-y-auto pr-1 custom-scrollbar max-h-48 relative">
+              
+              {/* Local Music Section */}
+              <div className="flex gap-2 mb-3 sticky top-0 bg-black/80 backdrop-blur-md p-1.5 z-10 rounded-xl border border-white/5">
+                <button onClick={()=>fileInputRef.current?.click()} className="flex-1 py-2 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-sky-200 hover:bg-white/20 hover:text-white transition-all">
+                  📄 Files
+                </button>
+                <button onClick={()=>folderInputRef.current?.click()} className="flex-1 py-2 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-sky-200 hover:bg-white/20 hover:text-white transition-all">
+                  📁 Folder
+                </button>
+              </div>
+
+              {localTracks.length > 0 && (
+                <div className="mb-4">
+                  <div className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-400 mb-2 pl-1 flex items-center gap-2">
+                    <div className="w-1 h-1 rounded-full bg-emerald-400"></div> Local Output
+                  </div>
+                  {localTracks.map((tr, idx) => (
+                    <button key={tr.url} onClick={()=>selectTrack(idx, true)}
+                      className={`w-full flex items-center gap-3 px-3 py-3 rounded-2xl transition-all text-left mb-2 ${track===idx && isLocal ? 'bg-gradient-to-r from-emerald-500/20 to-emerald-900/20 border border-emerald-400/40 text-white shadow-[0_0_15px_rgba(52,211,153,0.15)]' : 'bg-black/20 border border-white/5 text-white/50 hover:bg-white/5 hover:text-white'}`}
+                    >
+                      <span className="text-lg select-none">🎵</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-black truncate">{tr.name}</div>
+                      </div>
+                      {track===idx && isLocal && playing && <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0 shadow-[0_0_8px_rgba(52,211,153,1)]" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <div className="text-[9px] font-black uppercase tracking-[0.2em] text-cyan-400 mb-2 pl-1 flex items-center gap-2">
+                <div className="w-1 h-1 rounded-full bg-cyan-400"></div> Synths & Beats
+              </div>
+              {ZEN_TRACKS.map((tr, idx) => (
+                <button key={tr.id} onClick={()=>selectTrack(idx, false)}
+                  className={`w-full flex items-center gap-3 px-3 py-3 rounded-2xl transition-all text-left mb-2 ${track===idx && !isLocal ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/10 border border-cyan-400/40 text-white shadow-[0_0_15px_rgba(34,211,238,0.15)]' : 'bg-black/20 border border-white/5 text-white/50 hover:bg-white/5 hover:text-white'}`}
+                >
+                  <span className="text-xl select-none drop-shadow-md">{tr.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-black truncate">{tr.name}</div>
+                    <div className="text-[9px] uppercase tracking-widest text-cyan-300/60 font-black mt-0.5">{tr.desc}</div>
+                  </div>
+                  {track===idx && !isLocal && playing && <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shrink-0 shadow-[0_0_8px_rgba(34,211,238,1)]" />}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -2047,14 +2121,14 @@ const ZenPlayer = () => {
         <button
           id="zen-mode-toggle"
           onClick={()=>setOpen(!open)}
-          className={`flex items-center gap-2.5 px-4 py-3 rounded-2xl glass-panel border shadow-2xl hover:border-cyan-400/60 transition-all active:scale-95 ${playing ? 'border-cyan-400/40 zen-pulse-ring' : 'border-white/20'}`}
+          className={`flex items-center gap-3 px-5 py-3.5 rounded-[2rem] bg-black/60 backdrop-blur-xl border-2 shadow-[0_10px_40px_rgba(0,0,0,0.5)] hover:border-cyan-400/80 transition-all active:scale-95 group ${playing ? 'border-pink-500/50 zen-pulse-ring' : 'border-cyan-400/30'}`}
         >
-          <div className={`w-7 h-7 rounded-xl bg-cyan-400/15 border border-cyan-400/25 flex items-center justify-center text-base select-none ${playing ? 'animate-pulse' : ''}`}>
-            {playing ? t.icon : '🎵'}
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-lg select-none shadow-inner ${playing ? 'bg-gradient-to-br from-rose-500 to-pink-600 animate-pulse border border-pink-400 text-white' : 'bg-gradient-to-br from-cyan-400 to-blue-500 border border-cyan-300 text-white'}`}>
+            {playing ? t.icon : '📻'}
           </div>
-          <div className="text-left">
-            <div className="text-[10px] font-black uppercase tracking-[0.2em] text-sky-300/60">Zen Mode</div>
-            {playing && <div className="text-[10px] font-bold text-cyan-300 truncate max-w-[100px] leading-tight">{t.name}</div>}
+          <div className="text-left pr-2">
+            <div className={`text-[9px] font-black uppercase tracking-[0.25em] ${playing ? 'text-pink-400' : 'text-cyan-400'}`}>BEAT MACHINE</div>
+            {playing && <div className="text-xs font-black text-white truncate max-w-[120px] leading-tight mt-0.5">{t.name}</div>}
           </div>
         </button>
       )}
