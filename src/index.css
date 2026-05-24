@@ -454,11 +454,11 @@ input[type="range"].zen-volume::-webkit-slider-thumb:hover {
 
 /* ---- BLUE FIRE EFFECT ---- */
 @keyframes blue-fire-flicker {
-  0% { transform: scale(1) translateY(0) rotate(-2deg); opacity: 0.8; filter: blur(10px); }
-  25% { transform: scale(1.05) translateY(-5px) rotate(3deg); opacity: 1; filter: blur(14px); }
-  50% { transform: scale(0.95) translateY(-10px) rotate(-1deg); opacity: 0.7; filter: blur(16px); }
-  75% { transform: scale(1.08) translateY(-2px) rotate(4deg); opacity: 0.9; filter: blur(12px); }
-  100% { transform: scale(1) translateY(0) rotate(-2deg); opacity: 0.8; filter: blur(10px); }
+  0% { transform: translate(-50%, -50%) scale(1) translateY(0) rotate(-2deg); opacity: 0.8; filter: blur(10px); }
+  25% { transform: translate(-50%, -50%) scale(1.05) translateY(-5px) rotate(3deg); opacity: 1; filter: blur(14px); }
+  50% { transform: translate(-50%, -50%) scale(0.95) translateY(-10px) rotate(-1deg); opacity: 0.7; filter: blur(16px); }
+  75% { transform: translate(-50%, -50%) scale(1.08) translateY(-2px) rotate(4deg); opacity: 0.9; filter: blur(12px); }
+  100% { transform: translate(-50%, -50%) scale(1) translateY(0) rotate(-2deg); opacity: 0.8; filter: blur(10px); }
 }
 
 .blue-fire-effect {
