@@ -2557,9 +2557,9 @@ export default function App() {
               <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-32 bg-cyan-400/10 blur-[90px] rounded-full pointer-events-none"></div>
 
               {/* Elevated and highlighted brand logo */}
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-0 sm:gap-2 mt-2">
-                <img src="/icons/icon-512.png" alt="BurnOut Fire Logo" className="w-48 h-48 sm:w-64 sm:h-64 object-contain drop-shadow-[0_0_35px_rgba(34,211,238,0.6)] hover:scale-105 transition-transform duration-500" />
-                <h1 className="text-6xl sm:text-8xl font-black tracking-tighter leading-none text-white drop-shadow-[0_12px_24px_rgba(34,211,238,0.15)] uppercase select-none -mt-4 sm:mt-0">
+              <div className="flex items-center justify-center gap-0 sm:gap-2 mt-2">
+                <img src="/icons/icon-512.png" alt="BurnOut Fire Logo" className="w-28 h-28 sm:w-64 sm:h-64 object-contain drop-shadow-[0_0_35px_rgba(34,211,238,0.6)] hover:scale-105 transition-transform duration-500" />
+                <h1 className="text-5xl sm:text-8xl font-black tracking-tighter leading-none text-white drop-shadow-[0_12px_24px_rgba(34,211,238,0.15)] uppercase select-none">
                   Burn<span className="text-cyan-400 font-extrabold relative inline-block drop-shadow-[0_0_40px_rgba(34,211,238,0.45)]">out</span>
                 </h1>
               </div>
