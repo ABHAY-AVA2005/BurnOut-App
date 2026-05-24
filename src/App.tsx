@@ -2652,7 +2652,6 @@ export default function App() {
               <div className="relative flex flex-col items-center justify-center mt-2 group">
                 <div className="blue-fire-effect blue-fire-layer-1 pointer-events-none"></div>
                 <div className="blue-fire-effect blue-fire-layer-2 pointer-events-none"></div>
-                <div className="blue-fire-effect blue-fire-layer-3 pointer-events-none"></div>
                 <img src="/icons/icon-512.png" alt="BurnOut Fire Logo" className="w-72 h-72 sm:w-[28rem] sm:h-[28rem] lg:w-[35rem] lg:h-[35rem] object-contain drop-shadow-[0_0_35px_rgba(34,211,238,0.6)] transition-transform duration-700 group-hover:scale-105" />
                 <h1 className="absolute text-6xl sm:text-8xl font-black tracking-tighter leading-none text-white drop-shadow-[0_4px_30px_rgba(0,0,0,0.9)] uppercase select-none group-hover:scale-105 transition-transform duration-500">
                   Burn<span className="text-cyan-400 font-extrabold relative inline-block drop-shadow-[0_0_40px_rgba(34,211,238,0.65)]">out</span>
