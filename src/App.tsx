@@ -1846,7 +1846,7 @@ const ZenPlayer = () => {
     <div className="fixed bottom-6 right-5 z-[150] flex flex-col items-end gap-3">
       {/* Hidden file inputs */}
       <input type="file" ref={fileInputRef} accept="audio/*" multiple className="hidden" onChange={handleLoadFiles} />
-      <input type="file" ref={folderInputRef} accept="audio/*" webkitdirectory="true" className="hidden" onChange={handleLoadFiles} />
+      <input type="file" ref={folderInputRef} accept="audio/*" {...{ webkitdirectory: "true" }} className="hidden" onChange={handleLoadFiles} />
 
       {/* Full panel */}
       {open && (
