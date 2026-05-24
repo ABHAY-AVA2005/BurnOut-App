@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BurnOut — Offline</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Outfit', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(145deg,
+        #0b1d35 0%, #102745 18%, #163454 35%,
+        #1a3f62 52%, #1e4a70 68%, #1b3e5e 82%, #0e2540 100%
+      );
+      color: #e8f4ff;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Floating orbs */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: float 20s ease-in-out infinite;
+    }
+    .orb-1 {
+      width: 50vw; height: 50vw;
+      top: -10%; left: -10%;
+      background: radial-gradient(ellipse, rgba(34,211,238,0.28) 0%, transparent 70%);
+      filter: blur(60px);
+      animation-duration: 22s;
+    }
+    .orb-2 {
+      width: 55vw; height: 55vw;
+      bottom: -15%; right: -10%;
+      background: radial-gradient(ellipse, rgba(96,165,250,0.22) 0%, transparent 70%);
+      filter: blur(70px);
+      animation-duration: 28s;
+      animation-delay: -8s;
+    }
+    .orb-3 {
+      width: 30vw; height: 30vw;
+      top: 40%; right: 15%;
+      background: radial-gradient(ellipse, rgba(129,140,248,0.18) 0%, transparent 70%);
+      filter: blur(50px);
+      animation-duration: 32s;
+      animation-delay: -4s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33%       { transform: translate(30px, -40px) scale(1.1); }
+      66%       { transform: translate(-20px, 25px) scale(0.95); }
+    }
+
+    /* Grid overlay */
+    body::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(to right, rgba(120,200,255,0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(120,200,255,0.04) 1px, transparent 1px);
+      background-size: 44px 44px;
+      pointer-events: none;
+    }
+
+    .card {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 3rem 3.5rem;
+      border-radius: 2.5rem;
+      background: linear-gradient(135deg,
+        rgba(180,225,255,0.15) 0%,
+        rgba(120,190,255,0.08) 60%,
+        rgba(200,240,255,0.05) 100%
+      );
+      backdrop-filter: blur(60px) saturate(200%);
+      -webkit-backdrop-filter: blur(60px) saturate(200%);
+      border: 1px solid rgba(180,230,255,0.28);
+      box-shadow:
+        0 12px 64px rgba(10,50,120,0.30),
+        0 2px 0 rgba(255,255,255,0.35) inset;
+      max-width: 440px;
+      width: 90vw;
+    }
+
+    .icon-wrap {
+      width: 88px;
+      height: 88px;
+      margin: 0 auto 1.5rem;
+      border-radius: 50%;
+      background: rgba(34,211,238,0.12);
+      border: 1px solid rgba(34,211,238,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      box-shadow: 0 0 40px rgba(34,211,238,0.20);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.3rem 1rem;
+      border-radius: 999px;
+      font-size: 0.65rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      background: rgba(34,211,238,0.12);
+      border: 1px solid rgba(34,211,238,0.30);
+      color: #67e8f9;
+      margin-bottom: 1.2rem;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 6vw, 2.8rem);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin-bottom: 0.6rem;
+      color: #fff;
+    }
+
+    h1 span { color: #67e8f9; }
+
+    p {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: rgba(186, 230, 253, 0.65);
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+
+    .features {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+      text-align: left;
+    }
+
+    .feature-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-radius: 1rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #bae6fd;
+    }
+
+    .feature-row .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .dot-green  { background: #34d399; box-shadow: 0 0 8px #34d399; }
+    .dot-red    { background: #f87171; box-shadow: 0 0 8px #f87171; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.9rem 2rem;
+      border-radius: 1rem;
+      font-size: 0.85rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      border: none;
+    }
+
+    .btn-primary {
+      background: #22d3ee;
+      color: #0b1d35;
+      box-shadow: 0 4px 20px rgba(34,211,238,0.35);
+    }
+    .btn-primary:hover {
+      background: #67e8f9;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(34,211,238,0.50);
+    }
+
+    .logo {
+      position: absolute;
+      top: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.75rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.25em;
+      color: rgba(186,230,253,0.40);
+      z-index: 20;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="logo">BurnOut · Axion 2.5</div>
+
+  <!-- Orbs -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- Main card -->
+  <div class="card">
+    <div class="icon-wrap">🛜</div>
+    <div class="badge">Offline Mode</div>
+    <h1>You're <span>offline</span></h1>
+    <p>No internet connection detected. Most of BurnOut works without internet — your workouts, timers, and diet plans are fully cached.</p>
+
+    <div class="features">
+      <div class="feature-row">
+        <span class="dot dot-green"></span>
+        All workout modules &amp; timers — available
+      </div>
+      <div class="feature-row">
+        <span class="dot dot-green"></span>
+        Exercise cards, reps, form tips — available
+      </div>
+      <div class="feature-row">
+        <span class="dot dot-green"></span>
+        Diet plans &amp; nutrition data — available
+      </div>
+      <div class="feature-row">
+        <span class="dot dot-green"></span>
+        Sequence mode &amp; session tracking — available
+      </div>
+      <div class="feature-row">
+        <span class="dot dot-red"></span>
+        AI Custom Workout Generator — needs internet
+      </div>
+      <div class="feature-row">
+        <span class="dot dot-red"></span>
+        Exercise image search — needs internet
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="window.location.reload()">
+      ↻ &nbsp;Try Reconnecting
+    </button>
+  </div>
+
+</body>
+</html>

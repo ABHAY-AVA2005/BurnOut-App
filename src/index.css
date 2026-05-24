@@ -1,0 +1,374 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================================
+   PREMIUM FROZEN GLASSMORPHISM DESIGN SYSTEM
+   Ice · Smoke · Frost · Chill · Arctic Blue
+   ============================================================ */
+
+:root {
+  font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+
+  /* Ice palette tokens */
+  --ice-50:  #f0f7ff;
+  --ice-100: #dbeeff;
+  --ice-200: #b8dcff;
+  --ice-300: #8ac4f5;
+  --ice-400: #5aa4e8;
+  --ice-500: #3b82d6;
+  --ice-600: #2563b0;
+  --ice-700: #1e4f90;
+  --ice-800: #163c70;
+  --ice-900: #0f2a50;
+
+  --frost-white: rgba(255, 255, 255, 0.18);
+  --frost-border: rgba(255, 255, 255, 0.28);
+  --smoke-dark:  rgba(14, 30, 54, 0.45);
+  --smoke-mid:   rgba(20, 45, 80, 0.30);
+
+  /* Glow accents */
+  --cyan-glow:  rgba(34, 211, 238, 0.55);
+  --blue-glow:  rgba(96, 165, 250, 0.55);
+  --sky-glow:   rgba(125, 211, 252, 0.40);
+}
+
+/* ---- BASE BODY ---- */
+body {
+  background: linear-gradient(145deg,
+    #0b1d35 0%,
+    #102745 18%,
+    #163454 35%,
+    #1a3f62 52%,
+    #1e4a70 68%,
+    #1b3e5e 82%,
+    #0e2540 100%
+  );
+  background-attachment: fixed;
+  min-height: 100vh;
+  color: #e8f4ff;
+  font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+}
+
+/* ---- KEYFRAME: FLOAT ORBS ---- */
+@keyframes float-slow-1 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  33%       { transform: translate(60px, -80px) scale(1.18); }
+  66%       { transform: translate(-30px, 40px) scale(0.92); }
+}
+
+@keyframes float-slow-2 {
+  0%, 100% { transform: translate(0px, 0px) scale(1.08); }
+  40%       { transform: translate(-70px, 60px) scale(0.88); }
+  80%       { transform: translate(40px, -40px) scale(1.12); }
+}
+
+@keyframes float-slow-3 {
+  0%, 100% { transform: translate(0px, 0px) scale(0.95); }
+  50%       { transform: translate(50px, 60px) scale(1.08); }
+}
+
+@keyframes float-slow-4 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  50%       { transform: translate(-40px, -50px) scale(1.1); }
+}
+
+/* Fog drift */
+@keyframes fog-drift {
+  0%   { opacity: 0.18; transform: translateX(0) scaleX(1); }
+  50%  { opacity: 0.30; transform: translateX(40px) scaleX(1.05); }
+  100% { opacity: 0.18; transform: translateX(0) scaleX(1); }
+}
+
+/* Ice shimmer sweep across glass */
+@keyframes ice-shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* Pulse glow – cyan (active exercise) */
+@keyframes pulse-glow-cyan {
+  0%, 100% {
+    box-shadow:
+      0 0 18px rgba(34, 211, 238, 0.20),
+      0 0 40px rgba(34, 211, 238, 0.10),
+      inset 0 0 12px rgba(34, 211, 238, 0.06);
+    border-color: rgba(34, 211, 238, 0.35);
+  }
+  50% {
+    box-shadow:
+      0 0 40px rgba(34, 211, 238, 0.55),
+      0 0 80px rgba(34, 211, 238, 0.25),
+      inset 0 0 24px rgba(34, 211, 238, 0.18);
+    border-color: rgba(34, 211, 238, 0.80);
+  }
+}
+
+@keyframes pulse-glow-orange {
+  0%, 100% {
+    box-shadow: 0 0 16px rgba(249, 115, 22, 0.20), inset 0 0 8px rgba(249, 115, 22, 0.06);
+    border-color: rgba(249, 115, 22, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(249, 115, 22, 0.50), inset 0 0 18px rgba(249, 115, 22, 0.22);
+    border-color: rgba(249, 115, 22, 0.70);
+  }
+}
+
+@keyframes pulse-glow-emerald {
+  0%, 100% {
+    box-shadow: 0 0 16px rgba(16, 185, 129, 0.20), inset 0 0 8px rgba(16, 185, 129, 0.06);
+    border-color: rgba(16, 185, 129, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(16, 185, 129, 0.50), inset 0 0 18px rgba(16, 185, 129, 0.22);
+    border-color: rgba(16, 185, 129, 0.70);
+  }
+}
+
+@keyframes pulse-glow-slate {
+  0%, 100% {
+    box-shadow: 0 0 16px rgba(148, 163, 184, 0.20), inset 0 0 8px rgba(148, 163, 184, 0.06);
+    border-color: rgba(148, 163, 184, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(148, 163, 184, 0.50), inset 0 0 18px rgba(148, 163, 184, 0.22);
+    border-color: rgba(148, 163, 184, 0.70);
+  }
+}
+
+@keyframes pulse-glow-blue {
+  0%, 100% {
+    box-shadow: 0 0 16px rgba(96, 165, 250, 0.22), inset 0 0 8px rgba(96, 165, 250, 0.08);
+    border-color: rgba(96, 165, 250, 0.38);
+  }
+  50% {
+    box-shadow: 0 0 45px rgba(96, 165, 250, 0.60), inset 0 0 22px rgba(96, 165, 250, 0.25);
+    border-color: rgba(96, 165, 250, 0.80);
+  }
+}
+
+@keyframes pulse-glow-gold {
+  0%, 100% {
+    box-shadow: 0 0 16px rgba(255, 208, 67, 0.18), inset 0 0 8px rgba(255, 208, 67, 0.06);
+    border-color: rgba(255, 208, 67, 0.32);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(255, 208, 67, 0.50), inset 0 0 18px rgba(255, 208, 67, 0.22);
+    border-color: rgba(255, 208, 67, 0.70);
+  }
+}
+
+/* ---- FLOAT / FOG CLASSES ---- */
+.animate-float-1 { animation: float-slow-1 22s ease-in-out infinite; }
+.animate-float-2 { animation: float-slow-2 28s ease-in-out infinite; }
+.animate-float-3 { animation: float-slow-3 32s ease-in-out infinite; }
+.animate-float-4 { animation: float-slow-4 18s ease-in-out infinite; }
+.animate-fog     { animation: fog-drift 14s ease-in-out infinite; }
+
+/* ---- CORE GLASSMORPHISM PANELS ---- */
+
+/* Deep frozen dark glass — used in dark mode */
+.glass-panel {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.09) 0%,
+      rgba(180, 215, 255, 0.06) 50%,
+      rgba(255, 255, 255, 0.04) 100%
+    ) !important;
+  backdrop-filter: blur(48px) saturate(180%) brightness(1.05) !important;
+  -webkit-backdrop-filter: blur(48px) saturate(180%) brightness(1.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  box-shadow:
+    0 8px 48px rgba(10, 30, 70, 0.35),
+    0 2px 0px rgba(255, 255, 255, 0.12) inset,
+    0 -1px 0px rgba(0, 0, 0, 0.10) inset !important;
+}
+
+/* Frosted light glass — used in light/Axion mode */
+.glass-panel-light {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.42) 0%,
+      rgba(200, 230, 255, 0.28) 50%,
+      rgba(255, 255, 255, 0.20) 100%
+    ) !important;
+  backdrop-filter: blur(48px) saturate(200%) brightness(1.08) !important;
+  -webkit-backdrop-filter: blur(48px) saturate(200%) brightness(1.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.55) !important;
+  box-shadow:
+    0 8px 48px rgba(20, 60, 120, 0.18),
+    0 2px 0px rgba(255, 255, 255, 0.70) inset,
+    0 -1px 0px rgba(100, 150, 220, 0.08) inset !important;
+}
+
+/* Ice card — extra-frosted with cyan tint */
+.glass-ice {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(180, 225, 255, 0.22) 0%,
+      rgba(120, 190, 255, 0.12) 60%,
+      rgba(200, 240, 255, 0.08) 100%
+    ) !important;
+  backdrop-filter: blur(60px) saturate(220%) brightness(1.10) !important;
+  -webkit-backdrop-filter: blur(60px) saturate(220%) brightness(1.10) !important;
+  border: 1px solid rgba(180, 230, 255, 0.38) !important;
+  box-shadow:
+    0 12px 64px rgba(10, 50, 120, 0.28),
+    0 2px 0px rgba(255, 255, 255, 0.50) inset,
+    0 0 30px rgba(100, 200, 255, 0.08) inset !important;
+}
+
+/* Shimmer overlay on glass cards — add as child div */
+.glass-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.08) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: ice-shimmer 6s linear infinite;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* ---- NEON GLOW ACTIVE CLASSES ---- */
+.neon-glow-cyan-active   { animation: pulse-glow-cyan    3.5s ease-in-out infinite !important; }
+.neon-glow-orange-active { animation: pulse-glow-orange  3s   ease-in-out infinite !important; }
+.neon-glow-emerald-active{ animation: pulse-glow-emerald 3s   ease-in-out infinite !important; }
+.neon-glow-slate-active  { animation: pulse-glow-slate   3s   ease-in-out infinite !important; }
+.neon-glow-blue-active   { animation: pulse-glow-blue    3s   ease-in-out infinite !important; }
+.neon-glow-gold-active   { animation: pulse-glow-gold    3s   ease-in-out infinite !important; }
+
+/* ---- AMBIENT BACKGROUND ORBS ---- */
+/* These are the floating colored blurs behind everything */
+.orb-cyan {
+  background: radial-gradient(ellipse at center,
+    rgba(34, 211, 238, 0.30) 0%,
+    rgba(56, 189, 248, 0.15) 45%,
+    transparent 75%
+  );
+  filter: blur(0px);
+}
+
+.orb-blue {
+  background: radial-gradient(ellipse at center,
+    rgba(96, 165, 250, 0.28) 0%,
+    rgba(59, 130, 246, 0.14) 45%,
+    transparent 75%
+  );
+  filter: blur(0px);
+}
+
+.orb-indigo {
+  background: radial-gradient(ellipse at center,
+    rgba(129, 140, 248, 0.22) 0%,
+    rgba(99, 102, 241, 0.10) 45%,
+    transparent 75%
+  );
+  filter: blur(0px);
+}
+
+.orb-white {
+  background: radial-gradient(ellipse at center,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(200, 230, 255, 0.06) 45%,
+    transparent 75%
+  );
+  filter: blur(0px);
+}
+
+/* ---- GRID MESH OVERLAYS ---- */
+.grid-mesh {
+  background-size: 44px 44px;
+  background-image:
+    linear-gradient(to right, rgba(120, 200, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(120, 200, 255, 0.04) 1px, transparent 1px);
+}
+
+.grid-mesh-light {
+  background-size: 44px 44px;
+  background-image:
+    linear-gradient(to right, rgba(80, 150, 220, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(80, 150, 220, 0.05) 1px, transparent 1px);
+}
+
+/* ---- CUSTOM SCROLLBARS — ICE BLUE ---- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(120, 190, 255, 0.28);
+  border-radius: 99px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(120, 190, 255, 0.50);
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ---- TEXT SELECTION ---- */
+::selection {
+  background: rgba(96, 165, 250, 0.35);
+  color: #ffffff;
+}
+
+/* ---- UTILITY: ICE BORDER ---- */
+.border-ice {
+  border-color: rgba(180, 230, 255, 0.35);
+}
+
+.border-frost {
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+/* ---- BUTTON FROST ---- */
+.btn-frost {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #e8f4ff;
+  transition: all 0.25s ease;
+}
+.btn-frost:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(180, 230, 255, 0.50);
+  box-shadow: 0 4px 20px rgba(96, 165, 250, 0.20);
+}
+
+/* ---- INPUT FROST ---- */
+.input-frost {
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  color: #e8f4ff !important;
+  transition: all 0.25s ease !important;
+}
+.input-frost::placeholder {
+  color: rgba(200, 220, 255, 0.40) !important;
+}
+.input-frost:focus {
+  background: rgba(255, 255, 255, 0.14) !important;
+  border-color: rgba(96, 165, 250, 0.60) !important;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15) !important;
+  outline: none !important;
+}
