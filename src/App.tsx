@@ -1850,7 +1850,7 @@ const ZenPlayer = () => {
 
       {/* Full panel */}
       {open && (
-        <div className="zen-slide-up glass-panel border border-white/20 rounded-[2rem] p-5 w-72 shadow-2xl flex flex-col max-h-[85vh]">
+        <div className="zen-slide-up glass-panel border border-white/20 rounded-[2rem] p-5 w-72 shadow-2xl">
           {/* Header */}
           <div className="flex justify-between items-center mb-4 shrink-0">
             <div>
@@ -1903,7 +1903,7 @@ const ZenPlayer = () => {
           </div>
 
           {/* Scrollable Track list */}
-          <div className="space-y-1.5 overflow-y-auto pr-1 flex-1 min-h-0 custom-scrollbar">
+          <div className="space-y-1.5 overflow-y-auto pr-1 custom-scrollbar max-h-52">
             
             {/* Local Music Section */}
             <div className="flex gap-2 mb-2 sticky top-0 bg-[#0f2a50]/90 backdrop-blur-sm p-1 z-10 rounded-lg">
@@ -2628,6 +2628,72 @@ export default function App() {
             </div>
 
 
+            {/* SELECTION GRID TITLE */}
+            <div className="w-full text-left mb-8 flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-cyan-400/15 border border-cyan-400/25 text-cyan-300">
+                <Dumbbell className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-2xl sm:text-3xl font-black uppercase tracking-tighter text-white">Active Training Modules</h3>
+                <p className="text-xs font-bold text-sky-300/60 uppercase tracking-widest mt-1">Select a workout module below to begin tracking</p>
+              </div>
+            </div>
+
+            {/* MODULES CARDS GRID */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 w-full mb-16">
+              {[...Object.values(appLevels), ...customModules].map((level) => {
+                const Icon = level.icon || Sparkles;
+                const isCustom = customModules.some(m => m.id === level.id);
+
+                return (
+                  <div key={level.id} className="relative group flex">
+                    <button
+                      onClick={() => setActiveLevel(level.id)}
+                      className="w-full text-left p-5 rounded-[2rem] border border-white/15 transition-all duration-300 flex flex-col justify-between hover:-translate-y-2 hover:border-cyan-400/40 hover:shadow-2xl hover:shadow-cyan-400/10 overflow-hidden glass-ice glass-shimmer"
+                    >
+                      {/* Decorative Background Accent */}
+                      <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-bl from-cyan-400/10 to-transparent rounded-bl-full pointer-events-none" />
+
+                      <div>
+                        <div className="flex justify-between items-start w-full mb-4">
+                          <div className={`p-3 rounded-xl bg-white/10 border border-white/15 shadow-inner ${level.colorClass} group-hover:scale-110 transition-transform duration-300`}>
+                            <Icon className="w-6 h-6" />
+                          </div>
+                        </div>
+
+                        <div className="flex-1 relative z-10">
+                          <h2 className="text-xl font-black mb-1.5 text-white tracking-tight leading-tight">{level.title}</h2>
+                          <p className="text-sky-200/70 text-xs font-bold leading-snug">{level.subtitle}</p>
+                        </div>
+                      </div>
+
+                      {level.metrics && (
+                        <div className="flex items-center gap-3 pt-4 mt-3 border-t border-white/10 w-full relative z-10">
+                          <div className="flex items-center gap-1.5 text-[10px] font-black text-sky-200/60 bg-white/8 px-2.5 py-1 rounded-md border border-white/10">
+                            <Timer className="w-3.5 h-3.5 text-cyan-400 shrink-0" /> {level.metrics.time}
+                          </div>
+                          <div className="flex items-center gap-1.5 text-[10px] font-black text-sky-200/60 bg-white/8 px-2.5 py-1 rounded-md border border-white/10">
+                            <Flame className="w-3.5 h-3.5 text-cyan-400 shrink-0" /> {level.metrics.calories}
+                          </div>
+                        </div>
+                      )}
+                    </button>
+
+                    {/* Floating Delete Button for Custom Modules */}
+                    {isCustom && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); deleteCustomModule(level.id); }}
+                        className="absolute top-6 right-6 p-3 bg-rose-500/10 text-rose-600 hover:bg-rose-500 hover:text-white rounded-full transition-all z-20 shadow-sm hover:shadow-lg border border-rose-500/20"
+                        title="Delete Module"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+
             {/* AI WORKOUT GENERATOR COCKPIT CARD */}
             <div className="w-full rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden border border-white/15 mb-12 glass-ice glass-shimmer">
               <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-400/8 blur-3xl rounded-full -mr-20 -mt-20 pointer-events-none"></div>
@@ -2697,72 +2763,6 @@ export default function App() {
                   {isGenerating ? <><Loader2 className="w-5 h-5 animate-spin" /> GENERATING MODULE...</> : <><Sparkles className="w-5 h-5" /> {isOnline ? 'GENERATE CUSTOM PLAN' : 'OFFLINE — INTERNET NEEDED'}</>}
                 </button>
               </div>
-            </div>
-
-            {/* SELECTION GRID TITLE */}
-            <div className="w-full text-left mb-8 flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-cyan-400/15 border border-cyan-400/25 text-cyan-300">
-                <Dumbbell className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-2xl sm:text-3xl font-black uppercase tracking-tighter text-white">Active Training Modules</h3>
-                <p className="text-xs font-bold text-sky-300/60 uppercase tracking-widest mt-1">Select a workout module below to begin tracking</p>
-              </div>
-            </div>
-
-            {/* MODULES CARDS GRID */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 w-full mb-16">
-              {[...Object.values(appLevels), ...customModules].map((level) => {
-                const Icon = level.icon || Sparkles;
-                const isCustom = customModules.some(m => m.id === level.id);
-
-                return (
-                  <div key={level.id} className="relative group flex">
-                    <button
-                      onClick={() => setActiveLevel(level.id)}
-                      className="w-full text-left p-5 rounded-[2rem] border border-white/15 transition-all duration-300 flex flex-col justify-between hover:-translate-y-2 hover:border-cyan-400/40 hover:shadow-2xl hover:shadow-cyan-400/10 overflow-hidden glass-ice glass-shimmer"
-                    >
-                      {/* Decorative Background Accent */}
-                      <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-bl from-cyan-400/10 to-transparent rounded-bl-full pointer-events-none" />
-
-                      <div>
-                        <div className="flex justify-between items-start w-full mb-4">
-                          <div className={`p-3 rounded-xl bg-white/10 border border-white/15 shadow-inner ${level.colorClass} group-hover:scale-110 transition-transform duration-300`}>
-                            <Icon className="w-6 h-6" />
-                          </div>
-                        </div>
-
-                        <div className="flex-1 relative z-10">
-                          <h2 className="text-xl font-black mb-1.5 text-white tracking-tight leading-tight">{level.title}</h2>
-                          <p className="text-sky-200/70 text-xs font-bold leading-snug">{level.subtitle}</p>
-                        </div>
-                      </div>
-
-                      {level.metrics && (
-                        <div className="flex items-center gap-3 pt-4 mt-3 border-t border-white/10 w-full relative z-10">
-                          <div className="flex items-center gap-1.5 text-[10px] font-black text-sky-200/60 bg-white/8 px-2.5 py-1 rounded-md border border-white/10">
-                            <Timer className="w-3.5 h-3.5 text-cyan-400 shrink-0" /> {level.metrics.time}
-                          </div>
-                          <div className="flex items-center gap-1.5 text-[10px] font-black text-sky-200/60 bg-white/8 px-2.5 py-1 rounded-md border border-white/10">
-                            <Flame className="w-3.5 h-3.5 text-cyan-400 shrink-0" /> {level.metrics.calories}
-                          </div>
-                        </div>
-                      )}
-                    </button>
-
-                    {/* Floating Delete Button for Custom Modules */}
-                    {isCustom && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); deleteCustomModule(level.id); }}
-                        className="absolute top-6 right-6 p-3 bg-rose-500/10 text-rose-600 hover:bg-rose-500 hover:text-white rounded-full transition-all z-20 shadow-sm hover:shadow-lg border border-rose-500/20"
-                        title="Delete Module"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                    )}
-                  </div>
-                )
-              })}
             </div>
 
             {/* GLOBAL TRAINING BENCHMARKS DASHBOARD WIDGET */}
