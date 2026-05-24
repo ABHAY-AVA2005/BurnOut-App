@@ -1652,9 +1652,19 @@ const ZenPlayer = () => {
   const [playing, setPlaying] = useState(false);
   const [track, setTrack] = useState(0);
   const [vol, setVol] = useState(0.55);
+  
+  // Local files state
+  const [isLocal, setIsLocal] = useState(false);
+  const [localTracks, setLocalTracks] = useState<{name: string, url: string}[]>([]);
+  const [shuffle, setShuffle] = useState(false);
+  const [loop, setLoop] = useState(false);
+
   const ctxRef = useRef<any>(null);
   const masterRef = useRef<any>(null);
   const stopRef = useRef<any>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const folderInputRef = useRef<HTMLInputElement>(null);
 
   const getCtx = () => {
     if (!ctxRef.current || ctxRef.current.state === 'closed') {
@@ -1673,7 +1683,10 @@ const ZenPlayer = () => {
     return masterRef.current as GainNode;
   };
 
-  const stopAll = () => { if (stopRef.current) { stopRef.current(); stopRef.current = null; } };
+  const stopAll = () => { 
+    if (stopRef.current) { stopRef.current(); stopRef.current = null; } 
+    if (audioRef.current) { audioRef.current.pause(); }
+  };
 
   /* ── TRACK ENGINES ── */
   const playZen = (ctx: AudioContext, m: GainNode) => {
@@ -1738,38 +1751,108 @@ const ZenPlayer = () => {
 
   const engines = [playZen, playPower, playRain, playOcean, playLofi];
 
-  const play = (idx: number) => {
+  const play = (idx: number, asLocal: boolean, tracks: any[]) => {
     stopAll();
-    const ctx = getCtx();
-    const master = getMaster(ctx);
-    master.gain.value = vol;
-    stopRef.current = engines[idx](ctx, master);
+    
+    if (asLocal && tracks.length > 0) {
+      if (!audioRef.current) audioRef.current = new Audio();
+      audioRef.current.src = tracks[idx].url;
+      audioRef.current.volume = vol;
+      audioRef.current.loop = loop;
+      audioRef.current.play().catch(e => console.error("Playback failed", e));
+      stopRef.current = () => audioRef.current?.pause();
+    } else if (!asLocal) {
+      const ctx = getCtx();
+      const master = getMaster(ctx);
+      master.gain.value = vol;
+      stopRef.current = engines[idx](ctx, master);
+    }
     setPlaying(true);
+  };
+
+  // Next/Prev Handlers
+  const handleNext = () => {
+    const listLen = isLocal ? localTracks.length : ZEN_TRACKS.length;
+    if (listLen === 0) return;
+    const nextIdx = shuffle ? Math.floor(Math.random() * listLen) : (track + 1) % listLen;
+    setTrack(nextIdx);
+    if (playing) play(nextIdx, isLocal, localTracks);
+  };
+
+  const handlePrev = () => {
+    const listLen = isLocal ? localTracks.length : ZEN_TRACKS.length;
+    if (listLen === 0) return;
+    const prevIdx = shuffle ? Math.floor(Math.random() * listLen) : (track - 1 + listLen) % listLen;
+    setTrack(prevIdx);
+    if (playing) play(prevIdx, isLocal, localTracks);
   };
 
   const pause = () => { stopAll(); setPlaying(false); };
 
-  const selectTrack = (idx: number) => {
+  const selectTrack = (idx: number, asLocal: boolean) => {
+    setIsLocal(asLocal);
     setTrack(idx);
-    if (playing) play(idx);
+    if (playing) play(idx, asLocal, asLocal ? localTracks : ZEN_TRACKS);
   };
 
   const handleVol = (v: number) => {
     setVol(v);
     if (masterRef.current) masterRef.current.gain.value = v;
+    if (audioRef.current) audioRef.current.volume = v;
   };
 
-  useEffect(() => () => { stopAll(); if(ctxRef.current) ctxRef.current.close(); }, []);
+  const handleLoadFiles = (e: any) => {
+    const files = Array.from(e.target.files as FileList).filter(f => f.type.startsWith('audio/'));
+    if (files.length > 0) {
+      // Free old URLs
+      localTracks.forEach(t => URL.revokeObjectURL(t.url));
+      
+      const tracks = files.map(f => ({ name: f.name.replace(/\.[^/.]+$/, ""), url: URL.createObjectURL(f) }));
+      setLocalTracks(tracks);
+      setIsLocal(true);
+      setTrack(0);
+      play(0, true, tracks);
+    }
+    e.target.value = null; // reset
+  };
 
-  const t = ZEN_TRACKS[track];
+  // Setup HTML Audio Event Listeners
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.loop = loop;
+      audioRef.current.onended = () => {
+        if (!loop) {
+          const listLen = localTracks.length;
+          const nextIdx = shuffle ? Math.floor(Math.random() * listLen) : (track + 1) % listLen;
+          setTrack(nextIdx);
+          play(nextIdx, true, localTracks);
+        }
+      };
+    }
+  }, [loop, shuffle, track, localTracks]);
+
+  // Cleanup
+  useEffect(() => () => { 
+    stopAll(); 
+    if(ctxRef.current) ctxRef.current.close(); 
+    localTracks.forEach(t => URL.revokeObjectURL(t.url));
+  }, []);
+
+  const t = isLocal && localTracks[track] ? {
+    icon: '🎵', name: localTracks[track].name, desc: 'Local Audio'
+  } : ZEN_TRACKS[track] || ZEN_TRACKS[0];
 
   return (
     <div className="fixed bottom-6 right-5 z-[150] flex flex-col items-end gap-3">
+      {/* Hidden file inputs */}
+      <input type="file" ref={fileInputRef} accept="audio/*" multiple className="hidden" onChange={handleLoadFiles} />
+      <input type="file" ref={folderInputRef} accept="audio/*" webkitdirectory="true" className="hidden" onChange={handleLoadFiles} />
+
       {/* Full panel */}
       {open && (
-        <div className="zen-slide-up glass-panel border border-white/20 rounded-[2rem] p-5 w-72 shadow-2xl">
+        <div className="zen-slide-up glass-panel border border-white/20 rounded-[2rem] p-5 w-72 shadow-2xl flex flex-col max-h-[85vh]">
           {/* Header */}
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center mb-4 shrink-0">
             <div>
               <div className="text-[10px] font-black uppercase tracking-[0.22em] text-sky-300/50">Zen Mode</div>
               <div className="text-sm font-black text-white">In-App Music</div>
@@ -1778,9 +1861,9 @@ const ZenPlayer = () => {
           </div>
 
           {/* Now playing */}
-          <div className="mb-4 p-4 rounded-2xl bg-gradient-to-br from-cyan-400/10 to-blue-500/5 border border-cyan-400/20 text-center relative overflow-hidden">
+          <div className="mb-4 p-4 rounded-2xl bg-gradient-to-br from-cyan-400/10 to-blue-500/5 border border-cyan-400/20 text-center relative overflow-hidden shrink-0">
             <div className="text-3xl mb-1.5 select-none">{t.icon}</div>
-            <div className="text-sm font-black text-white">{t.name}</div>
+            <div className="text-sm font-black text-white truncate max-w-[200px] mx-auto">{t.name}</div>
             <div className="text-[10px] text-sky-300/55 font-bold uppercase tracking-widest mt-0.5">{t.desc}</div>
             {/* Equalizer bars */}
             <div className={`flex gap-[3px] justify-center items-end mt-3 h-7 ${!playing ? 'opacity-0' : ''}`}>
@@ -1791,36 +1874,75 @@ const ZenPlayer = () => {
           </div>
 
           {/* Controls */}
-          <div className="flex justify-center items-center gap-4 mb-5">
-            <button onClick={()=>selectTrack((track-1+ZEN_TRACKS.length)%ZEN_TRACKS.length)} className="w-9 h-9 flex items-center justify-center rounded-full glass-ice text-sky-300 hover:text-white border border-white/10 active:scale-90 transition-all text-base">⏮</button>
+          <div className="flex justify-center items-center gap-4 mb-4 shrink-0">
+            <button onClick={handlePrev} className="w-9 h-9 flex items-center justify-center rounded-full glass-ice text-sky-300 hover:text-white border border-white/10 active:scale-90 transition-all text-base">⏮</button>
             <button
-              onClick={()=>playing ? pause() : play(track)}
+              onClick={()=>playing ? pause() : play(track, isLocal, isLocal ? localTracks : ZEN_TRACKS)}
               className={`w-13 h-13 w-12 h-12 rounded-full flex items-center justify-center text-lg font-black transition-all active:scale-95 ${playing ? 'bg-rose-500 border border-rose-400/50 text-white hover:bg-rose-400 zen-pulse-ring' : 'bg-cyan-400 text-slate-900 hover:bg-cyan-300'}`}
             >
               {playing ? '⏸' : '▶'}
             </button>
-            <button onClick={()=>selectTrack((track+1)%ZEN_TRACKS.length)} className="w-9 h-9 flex items-center justify-center rounded-full glass-ice text-sky-300 hover:text-white border border-white/10 active:scale-90 transition-all text-base">⏭</button>
+            <button onClick={handleNext} className="w-9 h-9 flex items-center justify-center rounded-full glass-ice text-sky-300 hover:text-white border border-white/10 active:scale-90 transition-all text-base">⏭</button>
+          </div>
+
+          {/* Settings (Shuffle / Loop) */}
+          <div className="flex justify-center gap-3 mb-5 shrink-0">
+            <button onClick={()=>setShuffle(!shuffle)} className={`p-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all border ${shuffle ? 'bg-cyan-400/20 border-cyan-400 text-cyan-200' : 'glass-ice border-white/10 text-sky-300/50 hover:text-white'}`}>
+              🔀 Shuffle
+            </button>
+            <button onClick={()=>setLoop(!loop)} className={`p-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all border ${loop ? 'bg-cyan-400/20 border-cyan-400 text-cyan-200' : 'glass-ice border-white/10 text-sky-300/50 hover:text-white'}`}>
+              🔁 Loop
+            </button>
           </div>
 
           {/* Volume */}
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-3 mb-4 shrink-0">
             <span className="text-sm select-none">🔉</span>
             <input type="range" min={0} max={1} step={0.01} value={vol} onChange={e=>handleVol(parseFloat(e.target.value))} className="flex-1 zen-volume" />
             <span className="text-sm select-none">🔊</span>
           </div>
 
-          {/* Track list */}
-          <div className="space-y-1.5">
+          {/* Scrollable Track list */}
+          <div className="space-y-1.5 overflow-y-auto pr-1 flex-1 min-h-0 custom-scrollbar">
+            
+            {/* Local Music Section */}
+            <div className="flex gap-2 mb-2 sticky top-0 bg-[#0f2a50]/90 backdrop-blur-sm p-1 z-10 rounded-lg">
+              <button onClick={()=>fileInputRef.current?.click()} className="flex-1 py-1.5 rounded-lg glass-ice border border-white/10 text-[10px] font-black uppercase text-sky-200 hover:bg-white/10 transition-all">
+                📄 Select Files
+              </button>
+              <button onClick={()=>folderInputRef.current?.click()} className="flex-1 py-1.5 rounded-lg glass-ice border border-white/10 text-[10px] font-black uppercase text-sky-200 hover:bg-white/10 transition-all">
+                📁 Select Folder
+              </button>
+            </div>
+
+            {localTracks.length > 0 && (
+              <div className="mb-4">
+                <div className="text-[10px] font-black uppercase tracking-widest text-emerald-400 mb-2 pl-1">Local Playlist ({localTracks.length})</div>
+                {localTracks.map((tr, idx) => (
+                  <button key={tr.url} onClick={()=>selectTrack(idx, true)}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left mb-1.5 ${track===idx && isLocal ? 'bg-emerald-500/15 border border-emerald-400/30 text-white' : 'glass-ice border border-white/8 text-sky-200/70 hover:text-white hover:border-white/20'}`}
+                  >
+                    <span className="text-base select-none">🎵</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-black truncate">{tr.name}</div>
+                    </div>
+                    {track===idx && isLocal && playing && <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div className="text-[10px] font-black uppercase tracking-widest text-cyan-400 mb-2 pl-1">Synthesized Audio</div>
             {ZEN_TRACKS.map((tr, idx) => (
-              <button key={tr.id} onClick={()=>selectTrack(idx)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left ${track===idx ? 'bg-cyan-400/15 border border-cyan-400/30 text-white' : 'glass-ice border border-white/8 text-sky-200/70 hover:text-white hover:border-white/20'}`}
+              <button key={tr.id} onClick={()=>selectTrack(idx, false)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left mb-1.5 ${track===idx && !isLocal ? 'bg-cyan-400/15 border border-cyan-400/30 text-white' : 'glass-ice border border-white/8 text-sky-200/70 hover:text-white hover:border-white/20'}`}
               >
                 <span className="text-base select-none">{tr.icon}</span>
                 <div className="flex-1 min-w-0">
                   <div className="text-xs font-black truncate">{tr.name}</div>
                   <div className="text-[10px] text-sky-300/50 font-bold">{tr.desc}</div>
                 </div>
-                {track===idx && playing && <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shrink-0" />}
+                {track===idx && !isLocal && playing && <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shrink-0" />}
               </button>
             ))}
           </div>
@@ -1838,7 +1960,7 @@ const ZenPlayer = () => {
         </div>
         <div className="text-left">
           <div className="text-[10px] font-black uppercase tracking-[0.2em] text-sky-300/60">Zen Mode</div>
-          {playing && <div className="text-[10px] font-bold text-cyan-300 leading-tight">{t.name}</div>}
+          {playing && <div className="text-[10px] font-bold text-cyan-300 truncate max-w-[100px] leading-tight">{t.name}</div>}
         </div>
       </button>
     </div>
