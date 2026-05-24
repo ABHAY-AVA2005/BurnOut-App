@@ -3,21 +3,21 @@ import { Play, Pause, RotateCcw, CheckCircle2, ChevronDown, ChevronUp, Activity,
 
 const playBeep = () => {
   try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
     if (!AudioContext) return;
     const context = new AudioContext();
     const oscillator = context.createOscillator();
     const gainNode = context.createGain();
-    
+
     oscillator.type = 'triangle';
     oscillator.frequency.setValueAtTime(900, context.currentTime);
-    
+
     gainNode.gain.setValueAtTime(1.0, context.currentTime);
     gainNode.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.8);
-    
+
     oscillator.connect(gainNode);
     gainNode.connect(context.destination);
-    
+
     oscillator.start();
     oscillator.stop(context.currentTime + 0.8);
   } catch (e) {
@@ -29,9 +29,9 @@ const standardDiet = {
   title: "Pure Vegetarian Fat-Loss Diet",
   focus: "3 Normal Meals + Budget High-Protein Plan",
   sections: [
-      { meal: "Breakfast", items: ["Homemade food (Poha/Upma/Dosa)", "1 medium bowl", "Limit sugar"] },
-      { meal: "Lunch", items: ["2 Rotis OR 1 bowl Rice", "1 bowl Dal + 1 bowl Sabzi", "Plate of Salad first"] },
-      { meal: "Dinner", items: ["1-2 Rotis with Sabzi", "Lighter than lunch", "Eat 2 hrs before bed"] }
+    { meal: "Breakfast", items: ["Homemade food (Poha/Upma/Dosa)", "1 medium bowl", "Limit sugar"] },
+    { meal: "Lunch", items: ["2 Rotis OR 1 bowl Rice", "1 bowl Dal + 1 bowl Sabzi", "Plate of Salad first"] },
+    { meal: "Dinner", items: ["1-2 Rotis with Sabzi", "Lighter than lunch", "Eat 2 hrs before bed"] }
   ],
   budgetPlan: {
     title: "FINAL HIGH-PROTEIN FAT LOSS PLAN (BUDGET)",
@@ -145,7 +145,7 @@ const lowerBodyRedesignData = {
       { name: "Mountain Climbers", reps: "45 sec", time: 45, form: ["Push-up position", "Drive knees fast"], isCore: true },
       { name: "Lateral Skater Hops", reps: "45 sec", time: 45, form: ["Leap side to side", "Sweep back leg"], isCore: true },
       { name: "Double Calf Hops", reps: "45 sec", time: 45, form: ["Stay on balls of feet", "Legs straight"], isCore: true },
-      
+
       { name: "High Knees (Round 2)", reps: "45 sec", time: 45, form: ["Maintain speed"], isCore: true },
       { name: "Jump Squats (Round 2)", reps: "45 sec", time: 45, form: ["Push through the burn"], isCore: true },
       { name: "Mountain Climbers (Round 2)", reps: "45 sec", time: 45, form: ["Keep hips low"], isCore: true },
@@ -173,7 +173,7 @@ const lowerBodyRedesignData = {
             { name: "Jump Squats (R2)", reps: "40 sec", time: 40, form: ["Max effort"], isCore: true },
             { name: "Alt Front Lunges (R2)", reps: "40 sec", time: 40, form: ["Smooth motion"], isCore: true },
             { name: "Frog Extensions (R2)", reps: "40 sec", time: 40, form: ["Full extension"], isCore: true },
-            
+
             // Circuit 2
             { name: "Cross Mountain Climbers", reps: "40 sec", time: 40, form: ["Knee to opposite elbow"], isCore: true },
             { name: "Russian Twists", reps: "40 sec", time: 40, form: ["Twist full torso"], isCore: true },
@@ -324,7 +324,7 @@ const hiit500WorkoutData = {
         { name: "8. Bicycle Crunches", reps: "45 Sec", time: 45, form: ["Last core set"], isCore: true },
         { name: "9. Lunges (Alternating)", reps: "45 Sec", time: 45, form: ["Deep reps"], isCore: true },
         { name: "10. Sprint in Place", reps: "45 Sec", time: 45, form: ["All out till the beep!"], isCore: true },
-        
+
         // COOL DOWN
         { name: "Cool-Down: Static Stretching", reps: "5 Mins", time: 300, form: ["Cumulative total: ~200 Calories", "Calm your heart rate"], isCore: true }
       ]
@@ -1207,7 +1207,7 @@ const appLevels = {
     id: 'redesign',
     title: 'Lower Body Redesign',
     subtitle: '30-Day Zero-Equipment Shape Plan',
-    icon: Sparkles, 
+    icon: Sparkles,
     colorClass: 'text-amber-800 dark:text-amber-500',
     bgClass: 'bg-white/80 dark:bg-black/40 backdrop-blur-md border-2 border-white/80 dark:border-white/10 hover:bg-white dark:hover:bg-black/60',
     data: lowerBodyRedesignData,
@@ -1217,11 +1217,11 @@ const appLevels = {
 
 const bgThemes = {
   // All themes use the CSS body gradient — these classes add a subtle tint override
-  default:  'text-[#e8f4ff]',
-  inferno:  'text-[#e8f4ff] [--orb1:theme(colors.red.500/30%)] [--orb2:theme(colors.orange.500/20%)]',
+  default: 'text-[#e8f4ff]',
+  inferno: 'text-[#e8f4ff] [--orb1:theme(colors.red.500/30%)] [--orb2:theme(colors.orange.500/20%)]',
   titanium: 'text-[#e8f4ff] [--orb1:theme(colors.slate.400/25%)] [--orb2:theme(colors.zinc.400/15%)]',
-  voltage:  'text-[#e8f4ff] [--orb1:theme(colors.violet.500/30%)] [--orb2:theme(colors.indigo.400/20%)]',
-  jungle:   'text-[#e8f4ff] [--orb1:theme(colors.emerald.500/25%)] [--orb2:theme(colors.teal.400/18%)]'
+  voltage: 'text-[#e8f4ff] [--orb1:theme(colors.violet.500/30%)] [--orb2:theme(colors.indigo.400/20%)]',
+  jungle: 'text-[#e8f4ff] [--orb1:theme(colors.emerald.500/25%)] [--orb2:theme(colors.teal.400/18%)]'
 };
 
 const themeAccents: any = {
@@ -1326,8 +1326,8 @@ const ThemePicker = ({ bgTheme, setBgTheme }: any) => {
       {isOpen && (
         <div className="absolute right-0 mt-2 p-3 bg-white/95 dark:bg-[#1e293b] backdrop-blur-2xl rounded-2xl shadow-2xl border-2 border-white/60 dark:border-white/10 flex gap-3 z-50 animate-in fade-in zoom-in duration-200">
           {themes.map(t => (
-            <button 
-              key={t.id} 
+            <button
+              key={t.id}
               onClick={() => { setBgTheme(t.id); setIsOpen(false); }}
               className={`w-8 h-8 rounded-full shadow-md hover:scale-125 transition-transform ${t.color} ${bgTheme === t.id ? 'ring-2 ring-offset-2 ring-offset-[#FAF9F6] dark:ring-offset-[#0f172a] ring-amber-600' : ''}`}
               title={t.label}
@@ -1343,7 +1343,7 @@ const ExerciseCard = ({ exercise, onRemove, sequenceState = 'idle', onSequenceCo
   const [timeLeft, setTimeLeft] = useState(exercise.time);
   const [isRunning, setIsRunning] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [phase, setPhase] = useState('work'); 
+  const [phase, setPhase] = useState('work');
   const timerRef = useRef(null);
   const cardRef = useRef(null);
 
@@ -1391,17 +1391,17 @@ const ExerciseCard = ({ exercise, onRemove, sequenceState = 'idle', onSequenceCo
           if (prev <= 1) {
             clearInterval(timerRef.current);
             playBeep();
-            
+
             if (phase === 'work' && sequenceStateRef.current === 'active') {
               setPhase('rest');
-              setIsRunning(true); 
-              return 15; 
+              setIsRunning(true);
+              return 15;
             } else {
               setIsRunning(false);
               if (sequenceStateRef.current === 'active') {
                 setTimeout(() => {
                   if (sequenceCompleteRef.current) sequenceCompleteRef.current();
-                }, 500); 
+                }, 500);
               }
               return 0;
             }
@@ -1425,8 +1425,8 @@ const ExerciseCard = ({ exercise, onRemove, sequenceState = 'idle', onSequenceCo
 
   const handleSkip = () => {
     setIsRunning(false);
-    setPhase('work'); 
-    if(onSequenceComplete) onSequenceComplete();
+    setPhase('work');
+    if (onSequenceComplete) onSequenceComplete();
   };
 
   const isResting = phase === 'rest';
@@ -1434,9 +1434,9 @@ const ExerciseCard = ({ exercise, onRemove, sequenceState = 'idle', onSequenceCo
   return (
     <div ref={cardRef} className={`backdrop-blur-xl border transition-all duration-500 rounded-3xl p-4 sm:p-5 shadow-sm
       ${isDarkMode ? 'glass-panel text-white' : 'glass-panel-light text-[#37352f]'}
-      ${sequenceState !== 'idle' && !isResting ? `${activeGlow || 'neon-glow-orange-active'} scale-[1.02]` 
-      : sequenceState !== 'idle' && isResting ? 'neon-glow-emerald-active scale-[1.02]' 
-      : 'hover:border-neutral-500/30'}`}>
+      ${sequenceState !== 'idle' && !isResting ? `${activeGlow || 'neon-glow-orange-active'} scale-[1.02]`
+        : sequenceState !== 'idle' && isResting ? 'neon-glow-emerald-active scale-[1.02]'
+          : 'hover:border-neutral-500/30'}`}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex-1 flex items-start sm:items-center justify-between">
           <div>
@@ -1461,15 +1461,15 @@ const ExerciseCard = ({ exercise, onRemove, sequenceState = 'idle', onSequenceCo
           <div className={`font-mono text-lg sm:text-2xl w-16 sm:w-20 text-center font-black tracking-tight ${timeLeft === 0 ? 'text-rose-600' : isResting ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-700 dark:text-amber-500'}`}>
             {formatTime(timeLeft)}
           </div>
-          
+
           <div className="flex items-center gap-1.5">
             <button onClick={() => setIsRunning(!isRunning)} className={`p-2.5 sm:p-3 rounded-xl transition-all shadow-sm flex-shrink-0 ${isRunning ? 'bg-rose-500/10 text-rose-600 hover:bg-rose-500/20' : isResting ? 'bg-emerald-600/10 text-emerald-700 hover:bg-emerald-600/20' : 'bg-amber-600/10 text-amber-700 hover:bg-amber-600/20'}`}>
               {isRunning ? <Pause className="w-4 h-4 sm:w-5 sm:h-5" /> : <Play className="w-4 h-4 sm:w-5 sm:h-5 ml-0.5" />}
             </button>
-            
+
             {sequenceState !== 'idle' ? (
-              <button 
-                onClick={handleSkip} 
+              <button
+                onClick={handleSkip}
                 className="p-2.5 sm:p-3 rounded-xl bg-amber-600/10 text-amber-700 hover:bg-amber-600/20 transition-all flex-shrink-0 flex items-center justify-center gap-1 shadow-sm"
                 title={isResting ? "Skip Rest" : "Skip Exercise"}
               >
@@ -1525,102 +1525,102 @@ const CardioView = () => {
   return (
     <div className="space-y-6 sm:space-y-8 max-w-4xl mx-auto w-full">
       <div className="bg-white/80 dark:bg-[#1e293b]/80 backdrop-blur-xl rounded-[2rem] p-6 sm:p-8 text-[#37352f] dark:text-gray-100 shadow-2xl border-2 border-white/80 dark:border-white/10 transition-colors duration-300">
-         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-6">
-           <h2 className="text-2xl sm:text-3xl font-black tracking-tighter">MET Calorie Calculator</h2>
-           <div className="flex items-center gap-8 text-sm font-black">
-              <div className="text-center sm:text-right">
-                <div className="text-[10px] text-[#9CA3AF] uppercase tracking-widest mb-1">Profile</div>
-                <div className={!isCustom ? "text-amber-700 dark:text-amber-500" : "text-gray-400"}>{isCustom ? "Custom" : "Standard"}</div>
-              </div>
-              <div className="text-center sm:text-right">
-                <div className="text-[10px] text-[#9CA3AF] uppercase tracking-widest mb-1">Weight</div>
-                <div className="text-amber-900 dark:text-gray-100">{displayWeight} kg</div>
-              </div>
-              <div className="text-center sm:text-right">
-                <div className="text-[10px] text-[#9CA3AF] uppercase tracking-widest mb-1">Target</div>
-                <div className="text-amber-900 dark:text-gray-100">{displayTarget} kcal</div>
-              </div>
-           </div>
-         </div>
-
-         <div className="bg-[#FAF9F6]/80 dark:bg-black/40 backdrop-blur-md rounded-3xl p-5 sm:p-7 mb-10 border-2 border-black/5 dark:border-white/10 shadow-inner transition-colors duration-300">
-            <h3 className="text-xl font-black mb-4 tracking-tight">The MET Formula</h3>
-            <div className="mb-6 inline-block bg-white dark:bg-black/60 px-6 py-3 rounded-2xl border-2 border-black/5 shadow-sm">
-              <span className="font-mono text-lg text-[#374151] dark:text-gray-200">
-                <span className="font-black text-amber-700 dark:text-amber-500">Cal/Min</span> = <span className="border-b-4 border-amber-500/30 dark:border-gray-600 pb-0.5">MET × Weight × 3.5</span> / 200
-              </span>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-6">
+          <h2 className="text-2xl sm:text-3xl font-black tracking-tighter">MET Calorie Calculator</h2>
+          <div className="flex items-center gap-8 text-sm font-black">
+            <div className="text-center sm:text-right">
+              <div className="text-[10px] text-[#9CA3AF] uppercase tracking-widest mb-1">Profile</div>
+              <div className={!isCustom ? "text-amber-700 dark:text-amber-500" : "text-gray-400"}>{isCustom ? "Custom" : "Standard"}</div>
             </div>
-            <ul className="space-y-3 text-[#4B5563] dark:text-gray-300 text-sm font-bold list-none">
-              <li className="flex items-center gap-3"><span className="w-2 h-2 rounded-full bg-amber-600 shrink-0"></span><strong>Target:</strong> Burn 500+ kcal primarily from fat (50-70% ratio).</li>
-              <li className="flex items-center gap-3"><span className="w-2 h-2 rounded-full bg-amber-600 shrink-0"></span><strong>Condition:</strong> Maintain Heart Rate below 70% of max for lipid oxidation.</li>
-              <li className="flex items-center gap-3"><span className="w-2 h-2 rounded-full bg-amber-600 shrink-0"></span><strong>MET:</strong> Measures energy cost of activities. Higher = Intense.</li>
-            </ul>
-         </div>
+            <div className="text-center sm:text-right">
+              <div className="text-[10px] text-[#9CA3AF] uppercase tracking-widest mb-1">Weight</div>
+              <div className="text-amber-900 dark:text-gray-100">{displayWeight} kg</div>
+            </div>
+            <div className="text-center sm:text-right">
+              <div className="text-[10px] text-[#9CA3AF] uppercase tracking-widest mb-1">Target</div>
+              <div className="text-amber-900 dark:text-gray-100">{displayTarget} kcal</div>
+            </div>
+          </div>
+        </div>
 
-         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-           {workouts.map(w => (
-             <div key={w.id} className="bg-[#FAF9F6]/80 dark:bg-black/40 backdrop-blur-md rounded-3xl p-6 flex flex-col items-center border-2 border-white/80 dark:border-white/10 hover:border-amber-600 transition-all shadow-lg group">
-               <div className="p-5 bg-amber-600/10 rounded-2xl mb-5 text-amber-700 group-hover:scale-110 transition-transform">
-                 <w.icon className="w-10 h-10" />
-               </div>
-               <h4 className="text-xl font-black mb-3 text-center">{w.name}</h4>
-               <div className="bg-white dark:bg-black px-5 py-2 rounded-full text-xs font-black tracking-widest mb-8 text-[#6B7280] dark:text-gray-400 border-2 border-black/5">
-                 MET: {w.met}
-               </div>
-               
-               <div className="w-full space-y-6">
-                 <div className="flex justify-between items-center border-b-2 border-black/5 pb-4">
-                   <span className="text-[#6B7280] font-black text-xs uppercase tracking-tighter">Burn Rate</span>
-                   <div className="text-right">
-                     <div className="text-2xl font-black text-amber-900 dark:text-gray-100">{calcBurnRate(w.met)}</div>
-                     <div className="text-[10px] text-[#9CA3AF] font-black uppercase">kcal/m</div>
-                   </div>
-                 </div>
-                 <div className="flex justify-between items-center">
-                   <span className="text-[#6B7280] font-black text-xs uppercase tracking-tighter">Duration</span>
-                   <div className="text-3xl font-black text-amber-700 dark:text-amber-500">{calcDuration(w.met)} <span className="text-sm font-black uppercase">min</span></div>
-                 </div>
-               </div>
-             </div>
-           ))}
-         </div>
+        <div className="bg-[#FAF9F6]/80 dark:bg-black/40 backdrop-blur-md rounded-3xl p-5 sm:p-7 mb-10 border-2 border-black/5 dark:border-white/10 shadow-inner transition-colors duration-300">
+          <h3 className="text-xl font-black mb-4 tracking-tight">The MET Formula</h3>
+          <div className="mb-6 inline-block bg-white dark:bg-black/60 px-6 py-3 rounded-2xl border-2 border-black/5 shadow-sm">
+            <span className="font-mono text-lg text-[#374151] dark:text-gray-200">
+              <span className="font-black text-amber-700 dark:text-amber-500">Cal/Min</span> = <span className="border-b-4 border-amber-500/30 dark:border-gray-600 pb-0.5">MET × Weight × 3.5</span> / 200
+            </span>
+          </div>
+          <ul className="space-y-3 text-[#4B5563] dark:text-gray-300 text-sm font-bold list-none">
+            <li className="flex items-center gap-3"><span className="w-2 h-2 rounded-full bg-amber-600 shrink-0"></span><strong>Target:</strong> Burn 500+ kcal primarily from fat (50-70% ratio).</li>
+            <li className="flex items-center gap-3"><span className="w-2 h-2 rounded-full bg-amber-600 shrink-0"></span><strong>Condition:</strong> Maintain Heart Rate below 70% of max for lipid oxidation.</li>
+            <li className="flex items-center gap-3"><span className="w-2 h-2 rounded-full bg-amber-600 shrink-0"></span><strong>MET:</strong> Measures energy cost of activities. Higher = Intense.</li>
+          </ul>
+        </div>
 
-         <div className="bg-[#FAF9F6]/60 dark:bg-black/40 backdrop-blur-md rounded-3xl p-6 border-2 border-black/5 flex flex-col sm:flex-row items-center justify-between gap-8 relative overflow-hidden transition-all">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-600/5 to-transparent pointer-events-none" />
-            
-            <div className="flex flex-col sm:flex-row gap-6 w-full sm:w-auto z-10">
-              <div className={`flex items-center justify-between sm:justify-start gap-4 bg-white dark:bg-[#1e293b] px-6 py-4 rounded-2xl border-2 border-black/5 shadow-sm transition-all ${!isCustom ? 'opacity-30 grayscale' : 'opacity-100'}`}>
-                <label className="text-xs text-[#6B7280] font-black uppercase tracking-widest w-24">Target kcal</label>
-                <input 
-                  type="number" 
-                  value={targetCal}
-                  onChange={(e) => setTargetCal(Number(e.target.value))}
-                  disabled={!isCustom}
-                  className="bg-transparent border-none font-black text-xl text-amber-900 dark:text-gray-100 w-20 focus:ring-0 text-right outline-none"
-                />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+          {workouts.map(w => (
+            <div key={w.id} className="bg-[#FAF9F6]/80 dark:bg-black/40 backdrop-blur-md rounded-3xl p-6 flex flex-col items-center border-2 border-white/80 dark:border-white/10 hover:border-amber-600 transition-all shadow-lg group">
+              <div className="p-5 bg-amber-600/10 rounded-2xl mb-5 text-amber-700 group-hover:scale-110 transition-transform">
+                <w.icon className="w-10 h-10" />
               </div>
-              <div className={`flex items-center justify-between sm:justify-start gap-4 bg-white dark:bg-[#1e293b] px-6 py-4 rounded-2xl border-2 border-black/5 shadow-sm transition-all ${!isCustom ? 'opacity-30 grayscale' : 'opacity-100'}`}>
-                <label className="text-xs text-[#6B7280] font-black uppercase tracking-widest w-24">Weight kg</label>
-                <input 
-                  type="number" 
-                  value={weight}
-                  onChange={(e) => setWeight(Number(e.target.value))}
-                  disabled={!isCustom}
-                  className="bg-transparent border-none font-black text-xl text-amber-900 dark:text-gray-100 w-20 focus:ring-0 text-right outline-none"
-                />
+              <h4 className="text-xl font-black mb-3 text-center">{w.name}</h4>
+              <div className="bg-white dark:bg-black px-5 py-2 rounded-full text-xs font-black tracking-widest mb-8 text-[#6B7280] dark:text-gray-400 border-2 border-black/5">
+                MET: {w.met}
+              </div>
+
+              <div className="w-full space-y-6">
+                <div className="flex justify-between items-center border-b-2 border-black/5 pb-4">
+                  <span className="text-[#6B7280] font-black text-xs uppercase tracking-tighter">Burn Rate</span>
+                  <div className="text-right">
+                    <div className="text-2xl font-black text-amber-900 dark:text-gray-100">{calcBurnRate(w.met)}</div>
+                    <div className="text-[10px] text-[#9CA3AF] font-black uppercase">kcal/m</div>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[#6B7280] font-black text-xs uppercase tracking-tighter">Duration</span>
+                  <div className="text-3xl font-black text-amber-700 dark:text-amber-500">{calcDuration(w.met)} <span className="text-sm font-black uppercase">min</span></div>
+                </div>
               </div>
             </div>
+          ))}
+        </div>
 
-            <div className="flex items-center gap-4 w-full sm:w-auto justify-end z-10">
-              <span className="text-xs font-black uppercase tracking-widest text-[#4B5563] dark:text-gray-300">Custom Profile</span>
-              <button 
-                onClick={() => setIsCustom(!isCustom)}
-                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors shadow-inner ${isCustom ? 'bg-amber-600' : 'bg-black/10 dark:bg-white/10'}`}
-              >
-                <span className={`inline-block h-6 w-6 transform rounded-full bg-white shadow-md transition-transform ${isCustom ? 'translate-x-7' : 'translate-x-1'}`} />
-              </button>
+        <div className="bg-[#FAF9F6]/60 dark:bg-black/40 backdrop-blur-md rounded-3xl p-6 border-2 border-black/5 flex flex-col sm:flex-row items-center justify-between gap-8 relative overflow-hidden transition-all">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-600/5 to-transparent pointer-events-none" />
+
+          <div className="flex flex-col sm:flex-row gap-6 w-full sm:w-auto z-10">
+            <div className={`flex items-center justify-between sm:justify-start gap-4 bg-white dark:bg-[#1e293b] px-6 py-4 rounded-2xl border-2 border-black/5 shadow-sm transition-all ${!isCustom ? 'opacity-30 grayscale' : 'opacity-100'}`}>
+              <label className="text-xs text-[#6B7280] font-black uppercase tracking-widest w-24">Target kcal</label>
+              <input
+                type="number"
+                value={targetCal}
+                onChange={(e) => setTargetCal(Number(e.target.value))}
+                disabled={!isCustom}
+                className="bg-transparent border-none font-black text-xl text-amber-900 dark:text-gray-100 w-20 focus:ring-0 text-right outline-none"
+              />
             </div>
-         </div>
+            <div className={`flex items-center justify-between sm:justify-start gap-4 bg-white dark:bg-[#1e293b] px-6 py-4 rounded-2xl border-2 border-black/5 shadow-sm transition-all ${!isCustom ? 'opacity-30 grayscale' : 'opacity-100'}`}>
+              <label className="text-xs text-[#6B7280] font-black uppercase tracking-widest w-24">Weight kg</label>
+              <input
+                type="number"
+                value={weight}
+                onChange={(e) => setWeight(Number(e.target.value))}
+                disabled={!isCustom}
+                className="bg-transparent border-none font-black text-xl text-amber-900 dark:text-gray-100 w-20 focus:ring-0 text-right outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 w-full sm:w-auto justify-end z-10">
+            <span className="text-xs font-black uppercase tracking-widest text-[#4B5563] dark:text-gray-300">Custom Profile</span>
+            <button
+              onClick={() => setIsCustom(!isCustom)}
+              className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors shadow-inner ${isCustom ? 'bg-amber-600' : 'bg-black/10 dark:bg-white/10'}`}
+            >
+              <span className={`inline-block h-6 w-6 transform rounded-full bg-white shadow-md transition-transform ${isCustom ? 'translate-x-7' : 'translate-x-1'}`} />
+            </button>
+          </div>
+        </div>
       </div>
 
       <div className="bg-white/80 dark:bg-[#1e293b]/80 backdrop-blur-xl rounded-[2rem] p-6 sm:p-8 shadow-sm border-2 border-white/80 dark:border-white/10 transition-colors duration-300">
@@ -1629,9 +1629,9 @@ const CardioView = () => {
           <h3 className="text-2xl font-black tracking-tight">Hardware Sync</h3>
         </div>
         <ul className="space-y-5 text-[#4B5563] dark:text-gray-300 font-bold list-none pl-0">
-          <li className="flex gap-4 items-start"><CheckCircle2 className="w-5 h-5 text-amber-600 shrink-0 mt-1"/>GPS & Accelerometer Sync: Native pedometer and GPS tracking for real-time pacing.</li>
-          <li className="flex gap-4 items-start"><CheckCircle2 className="w-5 h-5 text-amber-600 shrink-0 mt-1"/>Wearable Biometrics: Integration with Apple Health/Google Fit for live heart rate.</li>
-          <li className="flex gap-4 items-start"><CheckCircle2 className="w-5 h-5 text-amber-600 shrink-0 mt-1"/>Validation Logic: Guaranteed &gt;90% accuracy using VO2 max estimation.</li>
+          <li className="flex gap-4 items-start"><CheckCircle2 className="w-5 h-5 text-amber-600 shrink-0 mt-1" />GPS & Accelerometer Sync: Native pedometer and GPS tracking for real-time pacing.</li>
+          <li className="flex gap-4 items-start"><CheckCircle2 className="w-5 h-5 text-amber-600 shrink-0 mt-1" />Wearable Biometrics: Integration with Apple Health/Google Fit for live heart rate.</li>
+          <li className="flex gap-4 items-start"><CheckCircle2 className="w-5 h-5 text-amber-600 shrink-0 mt-1" />Validation Logic: Guaranteed &gt;90% accuracy using VO2 max estimation.</li>
         </ul>
       </div>
     </div>
@@ -1639,10 +1639,10 @@ const CardioView = () => {
 };
 
 export default function App() {
-  const [activeLevel, setActiveLevel] = useState<string | null>(null); 
+  const [activeLevel, setActiveLevel] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('warmup');
-  const [activeSession, setActiveSession] = useState('pm'); 
-  const [bgTheme, setBgTheme] = useState('default'); 
+  const [activeSession, setActiveSession] = useState('pm');
+  const [bgTheme, setBgTheme] = useState('default');
   const [customExercises, setCustomExercises] = useState({ warmup: [], day1: [], day2: [], day3: [], day4: [], day5: [], recovery: [], cardio: [], hiit: [], torcher: [], evening_hiit: [] });
   const [sequence, setSequence] = useState({ tabId: null, currentIndex: -1, isPaused: false });
   const [globalResetTrigger, setGlobalResetTrigger] = useState(0);
@@ -1653,17 +1653,17 @@ export default function App() {
 
   // Track online/offline status
   useEffect(() => {
-    const goOnline  = () => setIsOnline(true);
+    const goOnline = () => setIsOnline(true);
     const goOffline = () => setIsOnline(false);
-    window.addEventListener('online',  goOnline);
+    window.addEventListener('online', goOnline);
     window.addEventListener('offline', goOffline);
     return () => {
-      window.removeEventListener('online',  goOnline);
+      window.removeEventListener('online', goOnline);
       window.removeEventListener('offline', goOffline);
     };
   }, []);
   const theme = themeAccents[bgTheme] || themeAccents.default;
-  
+
   // --- AI FEATURE STATE ---
   const [customModules, setCustomModules] = useState<any[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -1695,9 +1695,9 @@ export default function App() {
   useEffect(() => {
     // Keep PM active if we're in the evening hiit tab of the redesign module
     if (activeLevel === 'redesign' && activeTab === 'evening_hiit') {
-        setActiveSession('pm');
+      setActiveSession('pm');
     } else if (activeTab !== 'evening_hiit') {
-        setActiveSession('am');
+      setActiveSession('am');
     }
   }, [activeTab, activeLevel]);
 
@@ -1707,7 +1707,7 @@ export default function App() {
     if (appLevels[activeLevel]) return appLevels[activeLevel];
     return customModules.find(m => m.id === activeLevel);
   };
-  
+
   const currentWorkout = getActiveWorkout();
   const activeWorkoutData = currentWorkout ? currentWorkout.data : null;
 
@@ -1717,10 +1717,10 @@ export default function App() {
       setAiError("Please provide a focus area and duration.");
       return;
     }
-    
+
     setIsGenerating(true);
     setAiError('');
-    
+
     try {
       const prompt = `Act as an elite fitness coach. Generate a highly effective, single-day workout module. 
       Focus: ${aiPrompt.focus}. 
@@ -1799,7 +1799,7 @@ export default function App() {
         }
       };
 
-      const apiKey = (import.meta.env.VITE_GEMINI_API_KEY || "").replace(/^["']|["']$/g, ''); 
+      const apiKey = (import.meta.env.VITE_GEMINI_API_KEY || "").replace(/^["']|["']$/g, '');
       const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
       const response = await fetch(apiUrl, {
@@ -1822,12 +1822,12 @@ export default function App() {
         try {
           const cleanJsonText = jsonText.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
           const parsed = JSON.parse(cleanJsonText);
-          
+
           // Ensure day IDs are safe for tabs
           if (parsed.data && parsed.data.days) {
-             parsed.data.days = parsed.data.days.map((d, i) => ({...d, id: `ai_day_${i}`}));
+            parsed.data.days = parsed.data.days.map((d, i) => ({ ...d, id: `ai_day_${i}` }));
           }
-          
+
           const newModule = {
             ...parsed,
             id: `custom_${Date.now()}`,
@@ -1835,7 +1835,7 @@ export default function App() {
             colorClass: 'text-indigo-600 dark:text-indigo-400',
             bgClass: 'bg-white/80 dark:bg-black/40 backdrop-blur-md border-2 border-indigo-500/50 hover:bg-white dark:hover:bg-black/60 shadow-indigo-500/10'
           };
-          
+
           setCustomModules(prev => [...prev, newModule]);
           setAiPrompt({ focus: '', duration: '20', intensity: 'Medium' });
         } catch (parseErr) {
@@ -1902,7 +1902,7 @@ export default function App() {
     if (activeWorkoutData.warmup) {
       htmlContent += renderWorkout(activeWorkoutData.warmup.title, activeWorkoutData.warmup.exercises);
     }
-    
+
     if (activeWorkoutData.days) {
       activeWorkoutData.days.forEach(day => {
         if (day.sessions) {
@@ -1993,7 +1993,7 @@ export default function App() {
     if (!name) return;
     const reps = prompt("Reps/Target:", "15");
     const seconds = parseInt(prompt("Timer duration in seconds:", "60"), 10) || 60;
-    
+
     const newEx = {
       name,
       reps,
@@ -2020,7 +2020,7 @@ export default function App() {
           <div className="bg-white/90 dark:bg-[#1e293b]/80 backdrop-blur-xl border-2 border-white/80 dark:border-white/10 rounded-[2rem] p-6 sm:p-8 text-center shadow-2xl transition-all duration-300">
             <h2 className="text-2xl sm:text-4xl font-black text-[#37352f] dark:text-gray-100 tracking-tighter leading-none">{title}</h2>
             {focus && <p className="text-[#6B7280] dark:text-gray-400 mt-3 text-sm sm:text-lg font-bold tracking-tight">{focus}</p>}
-            
+
             {/* PERFORMANCE METRICS CARD WITHIN SECTION */}
             {levelData?.metrics && (
               <div className="mt-8 pt-6 border-t-2 border-black/5 dark:border-white/5 flex flex-wrap justify-center gap-4 sm:gap-8">
@@ -2044,13 +2044,12 @@ export default function App() {
         {exercises.length > 0 ? (
           <>
             <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-center gap-4 w-full">
-              <button 
+              <button
                 onClick={() => toggleSequence(sectionId)}
-                className={`py-4 px-8 rounded-2xl font-black text-sm sm:text-base flex items-center justify-center gap-3 transition-all shadow-xl hover:scale-105 active:scale-95 w-full sm:w-auto ${
-                  isThisTabSequencing 
-                    ? `${theme.bgLight} ${theme.textColor} border-2 ${theme.border} shadow-lg`
-                    : `${theme.bg} text-white shadow-lg`
-                }`}
+                className={`py-4 px-8 rounded-2xl font-black text-sm sm:text-base flex items-center justify-center gap-3 transition-all shadow-xl hover:scale-105 active:scale-95 w-full sm:w-auto ${isThisTabSequencing
+                  ? `${theme.bgLight} ${theme.textColor} border-2 ${theme.border} shadow-lg`
+                  : `${theme.bg} text-white shadow-lg`
+                  }`}
               >
                 {isThisTabSequencing ? (sequence.isPaused ? <Play className="w-5 h-5" /> : <Pause className="w-5 h-5" />) : <Rocket className="w-5 h-5" />}
                 {isThisTabSequencing ? (sequence.isPaused ? "RESUME" : "PAUSE") : "START SEQUENCE"}
@@ -2079,10 +2078,10 @@ export default function App() {
               {exercises.map((ex, idx) => {
                 const seqState = isThisTabSequencing && sequence.currentIndex === idx ? (sequence.isPaused ? 'paused' : 'active') : 'idle';
                 return (
-                  <ExerciseCard 
-                    key={ex.isCore ? `${sectionId}-ex-${idx}` : ex.id} 
-                    exercise={ex} 
-                    onRemove={() => removeExercise(sectionId, ex.id)} 
+                  <ExerciseCard
+                    key={ex.isCore ? `${sectionId}-ex-${idx}` : ex.id}
+                    exercise={ex}
+                    onRemove={() => removeExercise(sectionId, ex.id)}
                     sequenceState={seqState}
                     onSequenceComplete={() => handleSequenceComplete(sectionId, idx, exercises.length)}
                     globalResetTrigger={globalResetTrigger}
@@ -2098,7 +2097,7 @@ export default function App() {
             Coming Soon
           </div>
         )}
-        
+
         <button onClick={() => addExercise(sectionId)} className="w-full py-8 border-4 border-dashed border-black/5 dark:border-white/10 bg-white/40 dark:bg-white/5 backdrop-blur-md rounded-[2rem] text-[#6B7280] dark:text-gray-400 hover:border-amber-600 hover:text-amber-700 transition-all flex items-center justify-center gap-4 font-black text-lg">
           <Plus className="w-8 h-8" /> ADD CUSTOM EXERCISE
         </button>
@@ -2124,9 +2123,9 @@ export default function App() {
             {/* Orb 4 — white frost top-right */}
             <div className="orb-white absolute top-[5%] right-[25%] w-[28vw] h-[28vw] blur-[90px] animate-float-4 opacity-55" />
             {/* Orb 5 — extra cyan bottom-left */}
-            <div className="orb-cyan absolute bottom-[10%] left-[5%] w-[32vw] h-[32vw] blur-[100px] animate-float-2 opacity-45" style={{animationDelay: '-8s'}} />
+            <div className="orb-cyan absolute bottom-[10%] left-[5%] w-[32vw] h-[32vw] blur-[100px] animate-float-2 opacity-45" style={{ animationDelay: '-8s' }} />
           </div>
-          
+
           {/* GRID MESH */}
           <div className="fixed inset-0 pointer-events-none z-0 grid-mesh" />
 
@@ -2146,14 +2145,14 @@ export default function App() {
                 <ChevronLeft className="w-5 h-5" />
               </div>
             </div>
-            
-            <div className="px-5 py-2 rounded-full glass-ice border border-white/20 text-xs sm:text-sm font-black uppercase tracking-widest text-cyan-100 shadow-sm">
-              Axion 2.5
+
+            <div className="px-5 py-2 rounded-full glass-ice border border-white/20 text-xs sm:text-sm font-black  tracking-widest text-cyan-100 shadow-sm">
+              BurnOut
             </div>
 
             <div className="flex gap-3">
               <ThemePicker bgTheme={bgTheme} setBgTheme={setBgTheme} />
-              <button 
+              <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
                 className="p-3 rounded-full glass-ice border border-white/20 text-cyan-100 hover:border-cyan-400/50 active:scale-95 transition-all shadow-sm"
               >
@@ -2163,7 +2162,7 @@ export default function App() {
           </header>
 
           <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col items-center relative z-10">
-            
+
             {/* HERO SECTION */}
             <div className="mb-10 text-center space-y-3">
               <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-white leading-none drop-shadow-lg">
@@ -2179,12 +2178,12 @@ export default function App() {
 
             {/* ATHLETIC SPLIT IMAGE HEADERS */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-10 items-stretch">
-              
+
               {/* IMAGE 1: INFERNO SPRINT */}
               <div className="relative h-96 sm:h-[26rem] rounded-[2.5rem] overflow-hidden shadow-2xl group border border-white/15 hover:scale-[1.015] hover:border-cyan-400/30 transition-all duration-500 glass-ice">
-                <img 
-                  src="/src/assets/runner_overlay.png" 
-                  className="absolute inset-0 w-full h-full object-cover object-top opacity-95 group-hover:scale-105 group-hover:object-[center_10%] transition-all duration-[1400ms] ease-out" 
+                <img
+                  src="/src/assets/runner_overlay.png"
+                  className="absolute inset-0 w-full h-full object-cover object-top opacity-95 group-hover:scale-105 group-hover:object-[center_10%] transition-all duration-[1400ms] ease-out"
                   alt="Athlete sprinting"
                 />
                 {/* Only fade at bottom for text — top stays clear so face shows */}
@@ -2208,9 +2207,9 @@ export default function App() {
 
               {/* IMAGE 2: ENDURANCE CARDIO */}
               <div className="relative h-96 sm:h-[26rem] rounded-[2.5rem] overflow-hidden shadow-2xl group border border-white/15 hover:scale-[1.015] hover:border-cyan-400/30 transition-all duration-500 glass-ice">
-                <img 
-                  src="/src/assets/morning_run.png" 
-                  className="absolute inset-0 w-full h-full object-cover object-top opacity-92 group-hover:scale-105 group-hover:object-[center_8%] transition-all duration-[1400ms] ease-out" 
+                <img
+                  src="/src/assets/morning_run.png"
+                  className="absolute inset-0 w-full h-full object-cover object-top opacity-92 group-hover:scale-105 group-hover:object-[center_8%] transition-all duration-[1400ms] ease-out"
                   alt="Morning outdoor run"
                 />
                 {/* Only fade at bottom for text — top stays clear so face shows */}
@@ -2238,14 +2237,14 @@ export default function App() {
             {/* AI WORKOUT GENERATOR COCKPIT CARD */}
             <div className="w-full rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden border border-white/15 mb-12 glass-ice glass-shimmer">
               <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-400/8 blur-3xl rounded-full -mr-20 -mt-20 pointer-events-none"></div>
-              
+
               <div className="relative z-10">
                 <h3 className="text-2xl sm:text-3xl font-black mb-2 flex items-center gap-3 text-white tracking-tight">
-                  <Sparkles className="w-8 h-8 text-cyan-300 animate-pulse" /> 
+                  <Sparkles className="w-8 h-8 text-cyan-300 animate-pulse" />
                   Custom workout generator
                 </h3>
                 <p className="text-sky-200/60 font-bold text-sm mb-6">Instantly create a customized training module tailored to your exact intensity and targets.</p>
-                
+
                 <div className="flex flex-col sm:flex-row gap-4 mb-5">
                   <div className="flex-1 flex flex-col gap-2">
                     <label className="text-[10px] uppercase font-black tracking-[0.2em] text-sky-300/70 px-1">Focus Area</label>
@@ -2253,18 +2252,18 @@ export default function App() {
                       type="text"
                       placeholder="e.g., Core & Legs, Upper Body"
                       value={aiPrompt.focus}
-                      onChange={e => setAiPrompt({...aiPrompt, focus: e.target.value})}
+                      onChange={e => setAiPrompt({ ...aiPrompt, focus: e.target.value })}
                       className="input-frost w-full rounded-2xl px-5 py-4 font-bold"
                     />
                   </div>
-                  
+
                   <div className="w-full sm:w-56 flex flex-col gap-2">
                     <label className="text-[10px] uppercase font-black tracking-[0.2em] text-sky-300/70 px-1">Select Time in Minutes</label>
                     <input
                       type="number"
                       placeholder="Minutes"
                       value={aiPrompt.duration}
-                      onChange={e => setAiPrompt({...aiPrompt, duration: e.target.value})}
+                      onChange={e => setAiPrompt({ ...aiPrompt, duration: e.target.value })}
                       className="input-frost w-full rounded-2xl px-5 py-4 font-bold"
                     />
                   </div>
@@ -2273,7 +2272,7 @@ export default function App() {
                     <label className="text-[10px] uppercase font-black tracking-[0.2em] text-sky-300/70 px-1">Intensity</label>
                     <select
                       value={aiPrompt.intensity}
-                      onChange={e => setAiPrompt({...aiPrompt, intensity: e.target.value})}
+                      onChange={e => setAiPrompt({ ...aiPrompt, intensity: e.target.value })}
                       className="input-frost w-full rounded-2xl px-5 py-4 font-bold cursor-pointer"
                     >
                       <option value="Low">Low Intensity</option>
@@ -2293,14 +2292,13 @@ export default function App() {
                   </div>
                 )}
 
-                <button 
+                <button
                   onClick={generateAIWorkout}
                   disabled={isGenerating || !isOnline}
-                  className={`w-full sm:w-auto font-black py-4 px-8 rounded-2xl transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3 ${
-                    !isOnline
-                      ? 'bg-white/10 text-sky-300/40 border border-white/10 cursor-not-allowed'
-                      : 'bg-cyan-400 hover:bg-cyan-300 text-slate-900 hover:shadow-cyan-400/30 disabled:opacity-70'
-                  }`}
+                  className={`w-full sm:w-auto font-black py-4 px-8 rounded-2xl transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3 ${!isOnline
+                    ? 'bg-white/10 text-sky-300/40 border border-white/10 cursor-not-allowed'
+                    : 'bg-cyan-400 hover:bg-cyan-300 text-slate-900 hover:shadow-cyan-400/30 disabled:opacity-70'
+                    }`}
                 >
                   {isGenerating ? <><Loader2 className="w-5 h-5 animate-spin" /> GENERATING MODULE...</> : <><Sparkles className="w-5 h-5" /> {isOnline ? 'GENERATE CUSTOM PLAN' : 'OFFLINE — INTERNET NEEDED'}</>}
                 </button>
@@ -2323,7 +2321,7 @@ export default function App() {
               {[...Object.values(appLevels), ...customModules].map((level) => {
                 const Icon = level.icon || Sparkles;
                 const isCustom = customModules.some(m => m.id === level.id);
-                
+
                 return (
                   <div key={level.id} className="relative group flex">
                     <button
@@ -2335,49 +2333,49 @@ export default function App() {
 
                       <div>
                         <div className="flex justify-between items-start w-full mb-4">
-                           <div className={`p-3 rounded-xl bg-white/10 border border-white/15 shadow-inner ${level.colorClass} group-hover:scale-110 transition-transform duration-300`}>
-                              <Icon className="w-6 h-6" />
-                           </div>
+                          <div className={`p-3 rounded-xl bg-white/10 border border-white/15 shadow-inner ${level.colorClass} group-hover:scale-110 transition-transform duration-300`}>
+                            <Icon className="w-6 h-6" />
+                          </div>
                         </div>
 
                         <div className="flex-1 relative z-10">
-                           <h2 className="text-xl font-black mb-1.5 text-white tracking-tight leading-tight">{level.title}</h2>
-                           <p className="text-sky-200/70 text-xs font-bold leading-snug">{level.subtitle}</p>
+                          <h2 className="text-xl font-black mb-1.5 text-white tracking-tight leading-tight">{level.title}</h2>
+                          <p className="text-sky-200/70 text-xs font-bold leading-snug">{level.subtitle}</p>
                         </div>
                       </div>
 
                       {level.metrics && (
                         <div className="flex items-center gap-3 pt-4 mt-3 border-t border-white/10 w-full relative z-10">
                           <div className="flex items-center gap-1.5 text-[10px] font-black text-sky-200/60 bg-white/8 px-2.5 py-1 rounded-md border border-white/10">
-                            <Timer className="w-3.5 h-3.5 text-cyan-400 shrink-0"/> {level.metrics.time}
+                            <Timer className="w-3.5 h-3.5 text-cyan-400 shrink-0" /> {level.metrics.time}
                           </div>
                           <div className="flex items-center gap-1.5 text-[10px] font-black text-sky-200/60 bg-white/8 px-2.5 py-1 rounded-md border border-white/10">
-                            <Flame className="w-3.5 h-3.5 text-cyan-400 shrink-0"/> {level.metrics.calories}
+                            <Flame className="w-3.5 h-3.5 text-cyan-400 shrink-0" /> {level.metrics.calories}
                           </div>
                         </div>
                       )}
                     </button>
-                    
+
                     {/* Floating Delete Button for Custom Modules */}
                     {isCustom && (
                       <button
-                         onClick={(e) => { e.stopPropagation(); deleteCustomModule(level.id); }}
-                         className="absolute top-6 right-6 p-3 bg-rose-500/10 text-rose-600 hover:bg-rose-500 hover:text-white rounded-full transition-all z-20 shadow-sm hover:shadow-lg border border-rose-500/20"
-                         title="Delete Module"
+                        onClick={(e) => { e.stopPropagation(); deleteCustomModule(level.id); }}
+                        className="absolute top-6 right-6 p-3 bg-rose-500/10 text-rose-600 hover:bg-rose-500 hover:text-white rounded-full transition-all z-20 shadow-sm hover:shadow-lg border border-rose-500/20"
+                        title="Delete Module"
                       >
-                         <Trash2 className="w-5 h-5" />
+                        <Trash2 className="w-5 h-5" />
                       </button>
                     )}
                   </div>
                 )
               })}
             </div>
-            
+
             {/* GLOBAL TRAINING BENCHMARKS DASHBOARD WIDGET */}
             <div className="w-full border border-white/15 rounded-[3rem] p-8 sm:p-10 relative overflow-hidden glass-ice">
               {/* Decorative background blur */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-2xl bg-cyan-400/5 blur-[100px] rounded-full pointer-events-none"></div>
-              
+
               <div className="relative z-10">
                 <div className="flex items-center gap-4 mb-10 justify-center sm:justify-start">
                   <div className="p-3 bg-cyan-400/15 rounded-2xl border border-cyan-400/25 shadow-inner">
@@ -2385,7 +2383,7 @@ export default function App() {
                   </div>
                   <h3 className="text-2xl sm:text-3xl font-black uppercase tracking-tighter text-white">Global Training Benchmarks</h3>
                 </div>
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                   {[...Object.values(appLevels), ...customModules].filter(l => l.metrics).map((level) => (
                     <div key={`metric-${level.id}`} className="glass-panel rounded-3xl p-5 border border-white/12 transition-all hover:border-cyan-400/40 shadow-sm hover:shadow-md group">
@@ -2431,44 +2429,44 @@ export default function App() {
         if (day.id === 'torcher' || activeLevel === 'redesign') {
           return (
             <div className="space-y-10">
-               <div className="bg-white/90 dark:bg-[#1e293b]/80 backdrop-blur-xl border-2 border-white/80 dark:border-white/10 rounded-[3rem] p-8 shadow-2xl transition-all">
-                  <div className="flex items-center gap-4 mb-6 border-b-2 border-black/5 pb-4">
-                     <Timer className="w-8 h-8 text-orange-600" />
-                     <h2 className="text-2xl font-black tracking-tight text-[#37352f] dark:text-gray-100">Workout Summary & Predictions</h2>
+              <div className="bg-white/90 dark:bg-[#1e293b]/80 backdrop-blur-xl border-2 border-white/80 dark:border-white/10 rounded-[3rem] p-8 shadow-2xl transition-all">
+                <div className="flex items-center gap-4 mb-6 border-b-2 border-black/5 pb-4">
+                  <Timer className="w-8 h-8 text-orange-600" />
+                  <h2 className="text-2xl font-black tracking-tight text-[#37352f] dark:text-gray-100">Workout Summary & Predictions</h2>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="bg-orange-600/5 p-4 rounded-2xl border-2 border-black/5">
+                    <div className="text-[10px] uppercase font-black tracking-widest text-[#9CA3AF]">Total Workout Time</div>
+                    <div className="text-xl font-black text-orange-800 dark:text-orange-500">{activeWorkoutData.summary?.time || "Standard Run"}</div>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                     <div className="bg-orange-600/5 p-4 rounded-2xl border-2 border-black/5">
-                        <div className="text-[10px] uppercase font-black tracking-widest text-[#9CA3AF]">Total Workout Time</div>
-                        <div className="text-xl font-black text-orange-800 dark:text-orange-500">{activeWorkoutData.summary?.time || "Standard Run"}</div>
-                     </div>
-                     <div className="bg-orange-600/5 p-4 rounded-2xl border-2 border-black/5">
-                        <div className="text-[10px] uppercase font-black tracking-widest text-[#9CA3AF]">Predicted Active Burn</div>
-                        <div className="text-xl font-black text-orange-800 dark:text-orange-500">{activeWorkoutData.summary?.burn || "~200 kcal"}</div>
-                     </div>
-                     <div className="bg-orange-600/5 p-4 rounded-2xl border-2 border-black/5">
-                        <div className="text-[10px] uppercase font-black tracking-widest text-[#9CA3AF]">Predicted Afterburn</div>
-                        <div className="text-xl font-black text-orange-800 dark:text-orange-500">{activeWorkoutData.summary?.afterburn || "High"}</div>
-                     </div>
-                     <div className="bg-orange-600/5 p-4 rounded-2xl border-2 border-black/5">
-                        <div className="text-[10px] uppercase font-black tracking-widest text-[#9CA3AF]">Exercise Intensity</div>
-                        <div className="text-xl font-black text-orange-800 dark:text-orange-500">{activeWorkoutData.summary?.intensity || "High"}</div>
-                     </div>
+                  <div className="bg-orange-600/5 p-4 rounded-2xl border-2 border-black/5">
+                    <div className="text-[10px] uppercase font-black tracking-widest text-[#9CA3AF]">Predicted Active Burn</div>
+                    <div className="text-xl font-black text-orange-800 dark:text-orange-500">{activeWorkoutData.summary?.burn || "~200 kcal"}</div>
                   </div>
-                  {activeWorkoutData.summary?.tips && (
-                    <div className="mt-8">
-                       <h4 className="font-black text-xs uppercase tracking-[0.2em] text-orange-800 dark:text-orange-500 mb-4 flex items-center gap-2">Success Tips</h4>
-                       <ul className="space-y-3 pl-0 list-none">
-                          {activeWorkoutData.summary.tips.map((tip, i) => (
-                             <li key={i} className="flex gap-3 items-start text-sm font-bold text-[#4B5563] dark:text-gray-300">
-                                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-                                {tip}
-                             </li>
-                          ))}
-                       </ul>
-                    </div>
-                  )}
-               </div>
-               {renderWorkoutSection(day.id, day.title, day.focus, activeLevel === 'redesign' && day.sessions ? day.sessions[activeSession].exercises : day.exercises)}
+                  <div className="bg-orange-600/5 p-4 rounded-2xl border-2 border-black/5">
+                    <div className="text-[10px] uppercase font-black tracking-widest text-[#9CA3AF]">Predicted Afterburn</div>
+                    <div className="text-xl font-black text-orange-800 dark:text-orange-500">{activeWorkoutData.summary?.afterburn || "High"}</div>
+                  </div>
+                  <div className="bg-orange-600/5 p-4 rounded-2xl border-2 border-black/5">
+                    <div className="text-[10px] uppercase font-black tracking-widest text-[#9CA3AF]">Exercise Intensity</div>
+                    <div className="text-xl font-black text-orange-800 dark:text-orange-500">{activeWorkoutData.summary?.intensity || "High"}</div>
+                  </div>
+                </div>
+                {activeWorkoutData.summary?.tips && (
+                  <div className="mt-8">
+                    <h4 className="font-black text-xs uppercase tracking-[0.2em] text-orange-800 dark:text-orange-500 mb-4 flex items-center gap-2">Success Tips</h4>
+                    <ul className="space-y-3 pl-0 list-none">
+                      {activeWorkoutData.summary.tips.map((tip, i) => (
+                        <li key={i} className="flex gap-3 items-start text-sm font-bold text-[#4B5563] dark:text-gray-300">
+                          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                          {tip}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+              {renderWorkoutSection(day.id, day.title, day.focus, activeLevel === 'redesign' && day.sessions ? day.sessions[activeSession].exercises : day.exercises)}
             </div>
           );
         }
@@ -2481,7 +2479,7 @@ export default function App() {
                   <h2 className="text-4xl sm:text-6xl font-black text-[#37352f] dark:text-gray-100 tracking-tighter leading-none">{day.title}</h2>
                   <p className="text-[#6B7280] dark:text-gray-400 mt-3 text-lg font-bold tracking-tight">{day.focus}</p>
                 </div>
-                
+
                 <div className="flex justify-center bg-white/80 dark:bg-[#1e293b]/80 backdrop-blur-xl p-2 rounded-3xl w-full max-sm mx-auto border-2 border-white dark:border-white/10 shadow-2xl transition-all">
                   <button
                     onClick={() => setActiveSession('am')}
@@ -2530,7 +2528,7 @@ export default function App() {
             <p className="text-[#6B7280] dark:text-gray-400 mt-2 font-bold text-base sm:text-lg">{data.focus}</p>
           </div>
         </div>
-        
+
         {/* Daily Meals Section */}
         <div className="space-y-6">
           <h3 className="text-xl sm:text-2xl font-black tracking-tight text-[#37352f] dark:text-gray-100 flex items-center gap-3">
@@ -2538,18 +2536,18 @@ export default function App() {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {data.sections.map((s: any, i: number) => (
-                <div key={i} className="bg-white/80 dark:bg-[#1e293b]/80 backdrop-blur-md p-8 rounded-[2rem] border-2 border-white/80 dark:border-white/10 shadow-xl relative overflow-hidden group hover:-translate-y-1 transition-all duration-300">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-bl-full pointer-events-none"></div>
-                    <h4 className="text-amber-800 dark:text-amber-500 text-xl font-black mb-6 flex items-center gap-3"><Apple className="w-5 h-5"/>{s.meal}</h4>
-                    <ul className="space-y-4 font-bold list-none pl-0">
-                       {s.items.map((item: any, j: number) => (
-                         <li key={j} className="text-[#4B5563] dark:text-gray-200 flex gap-3 items-start">
-                           <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"/>
-                           <span className="leading-tight text-sm sm:text-base">{item}</span>
-                         </li>
-                       ))}
-                    </ul>
-                </div>
+              <div key={i} className="bg-white/80 dark:bg-[#1e293b]/80 backdrop-blur-md p-8 rounded-[2rem] border-2 border-white/80 dark:border-white/10 shadow-xl relative overflow-hidden group hover:-translate-y-1 transition-all duration-300">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-bl-full pointer-events-none"></div>
+                <h4 className="text-amber-800 dark:text-amber-500 text-xl font-black mb-6 flex items-center gap-3"><Apple className="w-5 h-5" />{s.meal}</h4>
+                <ul className="space-y-4 font-bold list-none pl-0">
+                  {s.items.map((item: any, j: number) => (
+                    <li key={j} className="text-[#4B5563] dark:text-gray-200 flex gap-3 items-start">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                      <span className="leading-tight text-sm sm:text-base">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
           </div>
         </div>
@@ -2563,7 +2561,7 @@ export default function App() {
 
             <div className="bg-white/80 dark:bg-[#1e293b]/80 backdrop-blur-xl border-2 border-white/80 dark:border-white/10 rounded-[2.5rem] p-6 sm:p-10 shadow-2xl transition-all duration-300">
               <h4 className="text-2xl font-black text-amber-800 dark:text-amber-500 tracking-tight mb-4">{data.budgetPlan.title}</h4>
-              
+
               {/* Profile Details Chips */}
               <div className="flex flex-wrap gap-2.5 mb-8">
                 {data.budgetPlan.profile.map((p: any, idx: number) => (
@@ -2680,7 +2678,7 @@ export default function App() {
                 <div key={idx} className="bg-white/80 dark:bg-[#1e293b]/80 backdrop-blur-md p-6 sm:p-8 rounded-[2.5rem] border-2 border-white/80 dark:border-white/10 shadow-xl flex flex-col justify-between group hover:-translate-y-1 transition-all duration-300">
                   <div>
                     <h4 className="text-lg sm:text-xl font-black text-amber-800 dark:text-amber-500 mb-4">{r.name}</h4>
-                    
+
                     {/* Ingredients chips */}
                     <div className="mb-5">
                       <h5 className="text-[10px] uppercase font-black tracking-wider text-[#9CA3AF] mb-2.5">Ingredients</h5>
@@ -2729,16 +2727,16 @@ export default function App() {
           <div className="orb-blue absolute bottom-[-12%] right-[-8%] w-[60vw] h-[60vw] blur-[130px] animate-float-2 opacity-70" />
           <div className="orb-indigo absolute top-[35%] right-[10%] w-[38vw] h-[38vw] blur-[100px] animate-float-3 opacity-60" />
           <div className="orb-white absolute top-[5%] right-[25%] w-[28vw] h-[28vw] blur-[90px] animate-float-4 opacity-55" />
-          <div className="orb-cyan absolute bottom-[10%] left-[5%] w-[32vw] h-[32vw] blur-[100px] animate-float-2 opacity-45" style={{animationDelay: '-8s'}} />
+          <div className="orb-cyan absolute bottom-[10%] left-[5%] w-[32vw] h-[32vw] blur-[100px] animate-float-2 opacity-45" style={{ animationDelay: '-8s' }} />
         </div>
-        
+
         {/* GRID MESH */}
         <div className="fixed inset-0 pointer-events-none z-0 grid-mesh" />
 
         <header className="glass-panel border-b border-white/12 sticky top-0 z-50 shadow-2xl transition-all relative">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-20 sm:h-24 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <button 
+              <button
                 onClick={() => setActiveLevel(null)}
                 className="p-3 rounded-full text-sky-100 glass-ice border border-white/15 hover:border-cyan-400/50 active:border-cyan-400 transition-all shadow-sm"
               >
@@ -2755,7 +2753,7 @@ export default function App() {
                 </div>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-3">
               <button onClick={handleDownloadPDF} className="p-3 rounded-full glass-ice text-sky-100 border border-white/15 hover:border-cyan-400/50 shadow-md active:scale-95 transition-all"><Download className="w-6 h-6" /></button>
               <ThemePicker bgTheme={bgTheme} setBgTheme={setBgTheme} />
@@ -2764,14 +2762,13 @@ export default function App() {
           </div>
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center overflow-x-auto no-scrollbar gap-3 border-t border-white/8 py-3 transition-all">
             {availableTabs.map(tab => (
-              <button 
+              <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`whitespace-nowrap px-6 py-2.5 text-xs sm:text-sm font-black rounded-xl transition-all ${
-                  activeTab === tab.id
-                    ? `bg-cyan-400 text-slate-900 shadow-lg shadow-cyan-400/25`
-                    : `glass-ice text-sky-200 border border-white/10 hover:border-cyan-400/40 hover:text-cyan-200`
-                }`}
+                className={`whitespace-nowrap px-6 py-2.5 text-xs sm:text-sm font-black rounded-xl transition-all ${activeTab === tab.id
+                  ? `bg-cyan-400 text-slate-900 shadow-lg shadow-cyan-400/25`
+                  : `glass-ice text-sky-200 border border-white/10 hover:border-cyan-400/40 hover:text-cyan-200`
+                  }`}
               >
                 {tab.label}
               </button>
@@ -2779,7 +2776,7 @@ export default function App() {
 
             <form onSubmit={handleImageSearch} className="ml-2 flex items-center gap-2 glass-ice backdrop-blur-md border border-white/15 rounded-2xl px-4 py-2 shadow-sm shrink-0">
               <button type="submit" className="hover:scale-110 transition-transform"><Search className={`w-4 h-4 ${theme.text}`} /></button>
-              <input type="text" value={imageSearch} onChange={(e) => setImageSearch(e.target.value)} placeholder="Exercise image..." className="bg-transparent border-none outline-none text-xs font-bold text-sky-100 w-32 focus:w-48 transition-all placeholder:text-sky-300/40"/>
+              <input type="text" value={imageSearch} onChange={(e) => setImageSearch(e.target.value)} placeholder="Exercise image..." className="bg-transparent border-none outline-none text-xs font-bold text-sky-100 w-32 focus:w-48 transition-all placeholder:text-sky-300/40" />
             </form>
           </div>
         </header>
