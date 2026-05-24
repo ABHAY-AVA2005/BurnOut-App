@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useRegisterSW } from 'virtual:pwa-register/react';
 import { Play, Pause, RotateCcw, CheckCircle2, ChevronDown, ChevronUp, Activity, Apple, Flame, Plus, Trash2, Rocket, FastForward, Leaf, Sun, Moon, Search, Square, Download, ChevronLeft, Shield, TrendingUp, Zap, Footprints, Palette, Timer, BarChart3, Sparkles, Loader2, Menu, Mic, Send, User, Dumbbell, Brain, Scale, Heart } from 'lucide-react';
 
 const playBeep = () => {
@@ -1655,6 +1656,19 @@ export default function App() {
   const [isInstallable, setIsInstallable] = useState(false);
   const [showInstallGuide, setShowInstallGuide] = useState(false);
 
+  // Service Worker auto-update
+  const {
+    needRefresh: [needRefresh, setNeedRefresh],
+    updateServiceWorker,
+  } = useRegisterSW({
+    onRegistered(r) {
+      console.log('[BurnOut SW] Registered:', r);
+    },
+    onRegisterError(error) {
+      console.error('[BurnOut SW] Registration error:', error);
+    },
+  });
+
   // Track PWA install prompt
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
@@ -2185,18 +2199,20 @@ export default function App() {
               </div>
             </div>
 
-            <div className="px-5 py-2 rounded-full glass-ice border border-white/20 text-xs sm:text-sm font-black  tracking-widest text-cyan-100 shadow-sm">
-              BurnOut
-            </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 items-center">
+              {isInstallable && (
+                <button
+                  id="pwa-install-btn-home"
+                  onClick={handleInstallApp}
+                  title="Install BurnOut App"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-full glass-ice border border-cyan-400/50 text-cyan-200 hover:bg-cyan-400/15 hover:text-cyan-100 active:scale-95 transition-all shadow-sm text-xs font-black uppercase tracking-wider animate-pulse-slow"
+                >
+                  <Download className="w-4 h-4" />
+                  <span className="hidden sm:inline">Install App</span>
+                </button>
+              )}
               <ThemePicker bgTheme={bgTheme} setBgTheme={setBgTheme} />
-              <button
-                onClick={() => setIsDarkMode(!isDarkMode)}
-                className="p-3 rounded-full glass-ice border border-white/20 text-cyan-100 hover:border-cyan-400/50 active:scale-95 transition-all shadow-sm"
-              >
-                {isDarkMode ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
-              </button>
             </div>
           </header>
 
@@ -2803,9 +2819,19 @@ export default function App() {
             </div>
 
             <div className="flex items-center gap-3">
+              {isInstallable && (
+                <button
+                  id="pwa-install-btn-workout"
+                  onClick={handleInstallApp}
+                  title="Install BurnOut App"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-full glass-ice border border-cyan-400/50 text-cyan-200 hover:bg-cyan-400/15 active:scale-95 transition-all shadow-sm text-xs font-black uppercase tracking-wider"
+                >
+                  <Download className="w-4 h-4" />
+                  <span className="hidden sm:inline">Install</span>
+                </button>
+              )}
               <button onClick={handleDownloadPDF} className="p-3 rounded-full glass-ice text-sky-100 border border-white/15 hover:border-cyan-400/50 shadow-md active:scale-95 transition-all"><Download className="w-6 h-6" /></button>
               <ThemePicker bgTheme={bgTheme} setBgTheme={setBgTheme} />
-              <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-3 rounded-full glass-ice text-sky-100 border border-white/15 hover:border-cyan-400/50 shadow-md active:scale-95 transition-all">{isDarkMode ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}</button>
             </div>
           </div>
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center overflow-x-auto no-scrollbar gap-3 border-t border-white/8 py-3 transition-all">
@@ -2832,6 +2858,33 @@ export default function App() {
         <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 relative z-10">
           {activeTabData ? activeTabData.render() : null}
         </main>
+
+        {/* SW UPDATE TOAST */}
+        {needRefresh && (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[300] w-[calc(100%-2rem)] max-w-sm">
+            <div className="flex items-center gap-4 px-5 py-4 rounded-2xl glass-panel border border-cyan-400/30 shadow-2xl backdrop-blur-2xl">
+              <div className="p-2 rounded-xl bg-cyan-400/15 border border-cyan-400/25">
+                <Sparkles className="w-5 h-5 text-cyan-300" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-black text-white leading-tight">New version available!</p>
+                <p className="text-[10px] text-sky-300/60 font-bold mt-0.5">BurnOut has been updated</p>
+              </div>
+              <button
+                onClick={() => updateServiceWorker(true)}
+                className="shrink-0 px-4 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-900 font-black text-xs uppercase tracking-wider transition-all active:scale-95"
+              >
+                Update
+              </button>
+              <button
+                onClick={() => setNeedRefresh(false)}
+                className="shrink-0 p-1.5 rounded-lg glass-ice text-sky-300 hover:text-white border border-white/10 text-xs font-black transition-all active:scale-90"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* PWA INSTALLATION GUIDE MODAL */}
         {showInstallGuide && (
