@@ -1654,11 +1654,15 @@ const ZenPlayer = () => {
   const [track, setTrack] = useState(0);
   const [vol, setVol] = useState(0.55);
   
-  // Local files state
+  // Local & Streaming state
   const [isLocal, setIsLocal] = useState(false);
   const [localTracks, setLocalTracks] = useState<{name: string, url: string}[]>([]);
   const [shuffle, setShuffle] = useState(false);
   const [loop, setLoop] = useState(false);
+  
+  const [playerTab, setPlayerTab] = useState<'synth' | 'stream'>('synth');
+  const [streamService, setStreamService] = useState<'spotify' | 'youtube' | 'gaana'>('spotify');
+  const [streamUrl, setStreamUrl] = useState('');
 
   const ctxRef = useRef<any>(null);
   const masterRef = useRef<any>(null);
@@ -1666,6 +1670,28 @@ const ZenPlayer = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
+
+  const formatEmbedUrl = (service: string, url: string) => {
+    if (!url) return '';
+    if (service === 'spotify') {
+      if (url.includes('spotify.com')) {
+        const match = url.match(/(track|playlist|album|episode)\/([a-zA-Z0-9]+)/);
+        if (match) return `https://open.spotify.com/embed/${match[1]}/${match[2]}?utm_source=generator&theme=0`;
+      }
+    } else if (service === 'youtube') {
+      if (url.includes('list=')) {
+        const listMatch = url.match(/list=([a-zA-Z0-9_-]+)/);
+        if (listMatch) return `https://www.youtube.com/embed/videoseries?list=${listMatch[1]}`;
+      } else if (url.includes('watch?v=')) {
+        const vidMatch = url.match(/v=([a-zA-Z0-9_-]+)/);
+        if (vidMatch) return `https://www.youtube.com/embed/${vidMatch[1]}`;
+      } else if (url.includes('youtu.be/')) {
+        const vidMatch = url.match(/youtu\.be\/([a-zA-Z0-9_-]+)/);
+        if (vidMatch) return `https://www.youtube.com/embed/${vidMatch[1]}`;
+      }
+    }
+    return url;
+  };
 
   const getCtx = () => {
     if (!ctxRef.current || ctxRef.current.state === 'closed') {
@@ -2013,7 +2039,7 @@ const ZenPlayer = () => {
           
           <div className="relative z-10">
             {/* Header */}
-            <div className="flex justify-between items-center mb-5 shrink-0">
+            <div className="flex justify-between items-center mb-4 shrink-0">
               <div>
                 <div className="text-[10px] font-black uppercase tracking-[0.3em] text-pink-400 animate-pulse">BurnOut Audio</div>
                 <div className="text-sm font-black text-white uppercase tracking-wider">Beat Machine</div>
@@ -2021,94 +2047,177 @@ const ZenPlayer = () => {
               <button onClick={()=>setOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-xl bg-white/5 hover:bg-rose-500 text-sky-300 hover:text-white border border-white/10 text-xs font-black transition-all active:scale-90 shadow-lg">✕</button>
             </div>
 
-            {/* Now playing */}
-            <div className="mb-5 p-5 rounded-3xl bg-gradient-to-br from-black/60 to-cyan-900/40 border border-cyan-400/40 text-center relative overflow-hidden shrink-0 shadow-[inset_0_0_30px_rgba(34,211,238,0.1)]">
-              {playing && <div className="absolute inset-0 bg-cyan-400/5 animate-pulse pointer-events-none"></div>}
-              <div className="text-4xl mb-2 select-none drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]">{t.icon}</div>
-              <div className="text-base font-black text-white truncate max-w-[200px] mx-auto tracking-tight">{t.name}</div>
-              <div className="text-[10px] text-cyan-300/80 font-black uppercase tracking-[0.2em] mt-1">{t.desc}</div>
-              {/* Equalizer bars */}
-              <div className={`flex gap-1 justify-center items-end mt-4 h-8 ${!playing ? 'opacity-0' : ''}`}>
-                {['eq-bar-1','eq-bar-2','eq-bar-3','eq-bar-4','eq-bar-5'].map(cls => (
-                  <div key={cls} className={`w-1.5 bg-gradient-to-t from-cyan-500 to-pink-500 rounded-full ${cls} shadow-[0_0_8px_rgba(34,211,238,0.8)]`} style={{height:'6px'}} />
-                ))}
-              </div>
-            </div>
-
-            {/* Controls */}
-            <div className="flex justify-center items-center gap-6 mb-6 shrink-0">
-              <button onClick={handlePrev} className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-cyan-400 hover:bg-white/10 hover:text-white border border-cyan-400/20 active:scale-90 transition-all text-base shadow-[0_0_15px_rgba(34,211,238,0.1)] hover:shadow-[0_0_20px_rgba(34,211,238,0.4)]">⏮</button>
-              <button
-                onClick={()=>playing ? pause() : play(track, isLocal, isLocal ? localTracks : ZEN_TRACKS)}
-                className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-black transition-all active:scale-95 shadow-[0_0_30px_rgba(34,211,238,0.4)] ${playing ? 'bg-gradient-to-br from-rose-500 to-pink-600 border border-pink-400 text-white hover:brightness-110 zen-pulse-ring' : 'bg-gradient-to-br from-cyan-400 to-blue-500 text-white hover:brightness-110'}`}
-              >
-                {playing ? '⏸' : '▶'}
+            {/* Mode Tabs */}
+            <div className="flex bg-black/40 rounded-2xl p-1.5 mb-5 border border-white/5 shrink-0">
+              <button onClick={() => setPlayerTab('synth')} className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.1em] transition-all ${playerTab === 'synth' ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/30 text-white shadow-[0_0_10px_rgba(34,211,238,0.2)]' : 'text-white/40 hover:text-white'}`}>
+                Internal Synth
               </button>
-              <button onClick={handleNext} className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-cyan-400 hover:bg-white/10 hover:text-white border border-cyan-400/20 active:scale-90 transition-all text-base shadow-[0_0_15px_rgba(34,211,238,0.1)] hover:shadow-[0_0_20px_rgba(34,211,238,0.4)]">⏭</button>
-            </div>
-
-            {/* Settings (Shuffle / Loop) */}
-            <div className="flex justify-center gap-3 mb-6 shrink-0">
-              <button onClick={()=>setShuffle(!shuffle)} className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border ${shuffle ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_10px_rgba(34,211,238,0.2)]' : 'bg-black/20 border-white/10 text-white/40 hover:text-white'}`}>
-                🔀 Shuffle
-              </button>
-              <button onClick={()=>setLoop(!loop)} className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border ${loop ? 'bg-pink-500/20 border-pink-400 text-pink-300 shadow-[0_0_10px_rgba(236,72,153,0.2)]' : 'bg-black/20 border-white/10 text-white/40 hover:text-white'}`}>
-                🔁 Loop
+              <button onClick={() => { pause(); setPlayerTab('stream'); }} className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.1em] transition-all ${playerTab === 'stream' ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-400/30 text-white shadow-[0_0_10px_rgba(16,185,129,0.2)]' : 'text-white/40 hover:text-white'}`}>
+                External Apps
               </button>
             </div>
 
-            {/* Volume */}
-            <div className="flex items-center gap-3 mb-5 shrink-0 bg-black/30 p-3 rounded-2xl border border-white/5">
-              <span className="text-sm select-none opacity-60">🔉</span>
-              <input type="range" min={0} max={1} step={0.01} value={vol} onChange={e=>handleVol(parseFloat(e.target.value))} className="flex-1 zen-volume" />
-              <span className="text-sm select-none opacity-60">🔊</span>
-            </div>
-
-            {/* Scrollable Track list */}
-            <div className="space-y-2 overflow-y-auto pr-1 custom-scrollbar max-h-48 relative">
-              
-              {/* Local Music Section */}
-              <div className="flex gap-2 mb-3 sticky top-0 bg-black/80 backdrop-blur-md p-1.5 z-10 rounded-xl border border-white/5">
-                <button onClick={()=>fileInputRef.current?.click()} className="flex-1 py-2 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-sky-200 hover:bg-white/20 hover:text-white transition-all">
-                  📄 Files
-                </button>
-                <button onClick={()=>folderInputRef.current?.click()} className="flex-1 py-2 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-sky-200 hover:bg-white/20 hover:text-white transition-all">
-                  📁 Folder
-                </button>
-              </div>
-
-              {localTracks.length > 0 && (
-                <div className="mb-4">
-                  <div className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-400 mb-2 pl-1 flex items-center gap-2">
-                    <div className="w-1 h-1 rounded-full bg-emerald-400"></div> Local Output
+            {playerTab === 'synth' && (
+              <>
+                {/* Now playing */}
+                <div className="mb-5 p-5 rounded-3xl bg-gradient-to-br from-black/60 to-cyan-900/40 border border-cyan-400/40 text-center relative overflow-hidden shrink-0 shadow-[inset_0_0_30px_rgba(34,211,238,0.1)]">
+                  {playing && <div className="absolute inset-0 bg-cyan-400/5 animate-pulse pointer-events-none"></div>}
+                  <div className="text-4xl mb-2 select-none drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]">{t.icon}</div>
+                  <div className="text-base font-black text-white truncate max-w-[200px] mx-auto tracking-tight">{t.name}</div>
+                  <div className="text-[10px] text-cyan-300/80 font-black uppercase tracking-[0.2em] mt-1">{t.desc}</div>
+                  {/* Equalizer bars */}
+                  <div className={`flex gap-1 justify-center items-end mt-4 h-8 ${!playing ? 'opacity-0' : ''}`}>
+                    {['eq-bar-1','eq-bar-2','eq-bar-3','eq-bar-4','eq-bar-5'].map(cls => (
+                      <div key={cls} className={`w-1.5 bg-gradient-to-t from-cyan-500 to-pink-500 rounded-full ${cls} shadow-[0_0_8px_rgba(34,211,238,0.8)]`} style={{height:'6px'}} />
+                    ))}
                   </div>
-                  {localTracks.map((tr, idx) => (
-                    <button key={tr.url} onClick={()=>selectTrack(idx, true)}
-                      className={`w-full flex items-center gap-3 px-3 py-3 rounded-2xl transition-all text-left mb-2 ${track===idx && isLocal ? 'bg-gradient-to-r from-emerald-500/20 to-emerald-900/20 border border-emerald-400/40 text-white shadow-[0_0_15px_rgba(52,211,153,0.15)]' : 'bg-black/20 border border-white/5 text-white/50 hover:bg-white/5 hover:text-white'}`}
+                </div>
+
+                {/* Controls */}
+                <div className="flex justify-center items-center gap-6 mb-6 shrink-0">
+                  <button onClick={handlePrev} className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-cyan-400 hover:bg-white/10 hover:text-white border border-cyan-400/20 active:scale-90 transition-all text-base shadow-[0_0_15px_rgba(34,211,238,0.1)] hover:shadow-[0_0_20px_rgba(34,211,238,0.4)]">⏮</button>
+                  <button
+                    onClick={()=>playing ? pause() : play(track, isLocal, isLocal ? localTracks : ZEN_TRACKS)}
+                    className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-black transition-all active:scale-95 shadow-[0_0_30px_rgba(34,211,238,0.4)] ${playing ? 'bg-gradient-to-br from-rose-500 to-pink-600 border border-pink-400 text-white hover:brightness-110 zen-pulse-ring' : 'bg-gradient-to-br from-cyan-400 to-blue-500 text-white hover:brightness-110'}`}
+                  >
+                    {playing ? '⏸' : '▶'}
+                  </button>
+                  <button onClick={handleNext} className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-cyan-400 hover:bg-white/10 hover:text-white border border-cyan-400/20 active:scale-90 transition-all text-base shadow-[0_0_15px_rgba(34,211,238,0.1)] hover:shadow-[0_0_20px_rgba(34,211,238,0.4)]">⏭</button>
+                </div>
+
+                {/* Settings (Shuffle / Loop) */}
+                <div className="flex justify-center gap-3 mb-6 shrink-0">
+                  <button onClick={()=>setShuffle(!shuffle)} className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border ${shuffle ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_10px_rgba(34,211,238,0.2)]' : 'bg-black/20 border-white/10 text-white/40 hover:text-white'}`}>
+                    🔀 Shuffle
+                  </button>
+                  <button onClick={()=>setLoop(!loop)} className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border ${loop ? 'bg-pink-500/20 border-pink-400 text-pink-300 shadow-[0_0_10px_rgba(236,72,153,0.2)]' : 'bg-black/20 border-white/10 text-white/40 hover:text-white'}`}>
+                    🔁 Loop
+                  </button>
+                </div>
+
+                {/* Volume */}
+                <div className="flex items-center gap-3 mb-5 shrink-0 bg-black/30 p-3 rounded-2xl border border-white/5">
+                  <span className="text-sm select-none opacity-60">🔉</span>
+                  <input type="range" min={0} max={1} step={0.01} value={vol} onChange={e=>handleVol(parseFloat(e.target.value))} className="flex-1 zen-volume" />
+                  <span className="text-sm select-none opacity-60">🔊</span>
+                </div>
+
+                {/* Scrollable Track list */}
+                <div className="space-y-2 overflow-y-auto pr-1 custom-scrollbar max-h-48 relative">
+                  
+                  {/* Local Music Section */}
+                  <div className="flex gap-2 mb-3 sticky top-0 bg-black/80 backdrop-blur-md p-1.5 z-10 rounded-xl border border-white/5">
+                    <button onClick={()=>fileInputRef.current?.click()} className="flex-1 py-2 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-sky-200 hover:bg-white/20 hover:text-white transition-all">
+                      📄 Files
+                    </button>
+                    <button onClick={()=>folderInputRef.current?.click()} className="flex-1 py-2 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-sky-200 hover:bg-white/20 hover:text-white transition-all">
+                      📁 Folder
+                    </button>
+                  </div>
+
+                  {localTracks.length > 0 && (
+                    <div className="mb-4">
+                      <div className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-400 mb-2 pl-1 flex items-center gap-2">
+                        <div className="w-1 h-1 rounded-full bg-emerald-400"></div> Local Output
+                      </div>
+                      {localTracks.map((tr, idx) => (
+                        <button key={tr.url} onClick={()=>selectTrack(idx, true)}
+                          className={`w-full flex items-center gap-3 px-3 py-3 rounded-2xl transition-all text-left mb-2 ${track===idx && isLocal ? 'bg-gradient-to-r from-emerald-500/20 to-emerald-900/20 border border-emerald-400/40 text-white shadow-[0_0_15px_rgba(52,211,153,0.15)]' : 'bg-black/20 border border-white/5 text-white/50 hover:bg-white/5 hover:text-white'}`}
+                        >
+                          <span className="text-lg select-none">🎵</span>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-xs font-black truncate">{tr.name}</div>
+                          </div>
+                          {track===idx && isLocal && playing && <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0 shadow-[0_0_8px_rgba(52,211,153,1)]" />}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="text-[9px] font-black uppercase tracking-[0.2em] text-cyan-400 mb-2 pl-1 flex items-center gap-2">
+                    <div className="w-1 h-1 rounded-full bg-cyan-400"></div> Synths & Beats
+                  </div>
+                  {ZEN_TRACKS.map((tr, idx) => (
+                    <button key={tr.id} onClick={()=>selectTrack(idx, false)}
+                      className={`w-full flex items-center gap-3 px-3 py-3 rounded-2xl transition-all text-left mb-2 ${track===idx && !isLocal ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/10 border border-cyan-400/40 text-white shadow-[0_0_15px_rgba(34,211,238,0.15)]' : 'bg-black/20 border border-white/5 text-white/50 hover:bg-white/5 hover:text-white'}`}
                     >
-                      <span className="text-lg select-none">🎵</span>
+                      <span className="text-xl select-none drop-shadow-md">{tr.icon}</span>
                       <div className="flex-1 min-w-0">
                         <div className="text-xs font-black truncate">{tr.name}</div>
+                        <div className="text-[9px] uppercase tracking-widest text-cyan-300/60 font-black mt-0.5">{tr.desc}</div>
                       </div>
-                      {track===idx && isLocal && playing && <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0 shadow-[0_0_8px_rgba(52,211,153,1)]" />}
+                      {track===idx && !isLocal && playing && <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shrink-0 shadow-[0_0_8px_rgba(34,211,238,1)]" />}
                     </button>
                   ))}
                 </div>
-              )}
+              </>
+            )}
 
-              <div className="text-[9px] font-black uppercase tracking-[0.2em] text-cyan-400 mb-2 pl-1 flex items-center gap-2">
-                <div className="w-1 h-1 rounded-full bg-cyan-400"></div> Synths & Beats
+            {playerTab === 'stream' && (
+              <div className="animate-fade-in flex flex-col gap-4">
+                <div className="flex justify-center gap-4 mb-2">
+                  <button onClick={() => { setStreamService('spotify'); setStreamUrl(''); }} className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all ${streamService === 'spotify' ? 'bg-[#1DB954]/20 border border-[#1DB954] text-[#1DB954] shadow-[0_0_15px_rgba(29,185,84,0.5)] scale-110' : 'bg-white/5 border border-transparent text-white/50 hover:bg-white/10'}`}>
+                    <span className="text-2xl leading-none">🎧</span>
+                  </button>
+                  <button onClick={() => { setStreamService('youtube'); setStreamUrl(''); }} className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all ${streamService === 'youtube' ? 'bg-[#FF0000]/20 border border-[#FF0000] text-[#FF0000] shadow-[0_0_15px_rgba(255,0,0,0.5)] scale-110' : 'bg-white/5 border border-transparent text-white/50 hover:bg-white/10'}`}>
+                    <span className="text-2xl leading-none">▶️</span>
+                  </button>
+                  <button onClick={() => { setStreamService('gaana'); setStreamUrl(''); }} className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all ${streamService === 'gaana' ? 'bg-[#E32524]/20 border border-[#E32524] text-[#E32524] shadow-[0_0_15px_rgba(227,37,36,0.5)] scale-110' : 'bg-white/5 border border-transparent text-white/50 hover:bg-white/10'}`}>
+                    <span className="text-2xl leading-none">🎵</span>
+                  </button>
+                </div>
+
+                {/* Input for custom URL */}
+                <input 
+                  type="text" 
+                  value={streamUrl} 
+                  onChange={(e) => setStreamUrl(e.target.value)} 
+                  placeholder={`Paste ${streamService === 'spotify' ? 'Spotify' : streamService === 'youtube' ? 'YouTube Music' : 'Gaana'} link here...`} 
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs text-white placeholder-white/30 focus:outline-none focus:border-cyan-400 transition-colors shadow-inner"
+                />
+
+                {/* Embed iframe */}
+                <div className="bg-black/50 rounded-2xl border border-white/10 overflow-hidden h-[300px] sm:h-[350px] relative flex flex-col items-center justify-center text-white/30 text-xs text-center p-4">
+                  {streamUrl ? (
+                    <iframe 
+                      src={formatEmbedUrl(streamService, streamUrl)} 
+                      width="100%" 
+                      height="100%" 
+                      frameBorder="0" 
+                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                      className="absolute inset-0 z-10 bg-black"
+                    ></iframe>
+                  ) : (
+                    <div className="animate-fade-in w-full">
+                      <div className="text-4xl mb-3 opacity-50 drop-shadow-lg">🔗</div>
+                      <div className="font-bold tracking-wide mb-5 text-white/40">Paste a playlist link above, or choose a curated default:</div>
+                      
+                      <div className="flex flex-col gap-2 relative z-20 w-full px-2">
+                        {streamService === 'spotify' && (
+                          <>
+                            <button onClick={()=>setStreamUrl('https://open.spotify.com/playlist/37i9dQZF1DX76Wlfdnj7AP')} className="w-full px-4 py-3 bg-gradient-to-r from-[#1DB954]/10 to-[#1DB954]/5 hover:from-[#1DB954]/30 hover:to-[#1DB954]/10 border border-[#1DB954]/30 hover:border-[#1DB954] text-white text-[11px] uppercase tracking-widest font-black rounded-xl transition-all shadow-md">Beast Mode Workout</button>
+                            <button onClick={()=>setStreamUrl('https://open.spotify.com/playlist/37i9dQZF1DXe6bgV3TmZOL')} className="w-full px-4 py-3 bg-gradient-to-r from-[#1DB954]/10 to-[#1DB954]/5 hover:from-[#1DB954]/30 hover:to-[#1DB954]/10 border border-[#1DB954]/30 hover:border-[#1DB954] text-white text-[11px] uppercase tracking-widest font-black rounded-xl transition-all shadow-md">Phonk Workout</button>
+                          </>
+                        )}
+                        {streamService === 'youtube' && (
+                          <>
+                            <button onClick={()=>setStreamUrl('https://music.youtube.com/playlist?list=RDCLAK5uy_kQyD87tV56u7k92m6_2aD1B1sP36O2uHk')} className="w-full px-4 py-3 bg-gradient-to-r from-[#FF0000]/10 to-[#FF0000]/5 hover:from-[#FF0000]/30 hover:to-[#FF0000]/10 border border-[#FF0000]/30 hover:border-[#FF0000] text-white text-[11px] uppercase tracking-widest font-black rounded-xl transition-all shadow-md">Hardstyle & Gym</button>
+                            <button onClick={()=>setStreamUrl('https://music.youtube.com/playlist?list=RDCLAK5uy_nCGxR1A1HhFts-TLYa52fGik12-z7P-Fk')} className="w-full px-4 py-3 bg-gradient-to-r from-[#FF0000]/10 to-[#FF0000]/5 hover:from-[#FF0000]/30 hover:to-[#FF0000]/10 border border-[#FF0000]/30 hover:border-[#FF0000] text-white text-[11px] uppercase tracking-widest font-black rounded-xl transition-all shadow-md">Trap Workout</button>
+                          </>
+                        )}
+                        {streamService === 'gaana' && (
+                          <div className="text-[11px] border border-white/10 bg-white/5 rounded-xl p-4 text-white/50">
+                            Gaana embeds are sometimes blocked by CORS. <br/><br/> Paste a valid Gaana playlist URL to try.
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-              {ZEN_TRACKS.map((tr, idx) => (
-                <button key={tr.id} onClick={()=>selectTrack(idx, false)}
-                  className={`w-full flex items-center gap-3 px-3 py-3 rounded-2xl transition-all text-left mb-2 ${track===idx && !isLocal ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/10 border border-cyan-400/40 text-white shadow-[0_0_15px_rgba(34,211,238,0.15)]' : 'bg-black/20 border border-white/5 text-white/50 hover:bg-white/5 hover:text-white'}`}
-                >
-                  <span className="text-xl select-none drop-shadow-md">{tr.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs font-black truncate">{tr.name}</div>
-                    <div className="text-[9px] uppercase tracking-widest text-cyan-300/60 font-black mt-0.5">{tr.desc}</div>
-                  </div>
-                  {track===idx && !isLocal && playing && <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shrink-0 shadow-[0_0_8px_rgba(34,211,238,1)]" />}
+            )}
+          </div>
+        </div>
                 </button>
               ))}
             </div>
@@ -2147,7 +2256,14 @@ export default function App() {
   const [globalResetTrigger, setGlobalResetTrigger] = useState(0);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showGeneratorPanel, setShowGeneratorPanel] = useState(false);
-  const [imageSearch, setImageSearch] = useState('');
+  
+  // AI Fitness Search State
+  const [aiSearchQuery, setAiSearchQuery] = useState('');
+  const [aiSearchResult, setAiSearchResult] = useState('');
+  const [isAiSearching, setIsAiSearching] = useState(false);
+  const [showSearchModal, setShowSearchModal] = useState(false);
+  const [isLandingSearchExpanded, setIsLandingSearchExpanded] = useState(false);
+
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   // PWA installation states
@@ -2497,11 +2613,47 @@ export default function App() {
     }
   };
 
-  const handleImageSearch = (e) => {
-    e.preventDefault();
-    if (imageSearch.trim()) {
-      window.open(`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(imageSearch.trim() + ' exercise posture')}`, '_blank');
-      setImageSearch('');
+  const handleFitnessSearch = async (e?: any) => {
+    if (e) e.preventDefault();
+    if (!aiSearchQuery.trim()) return;
+
+    setIsAiSearching(true);
+    setAiSearchResult('');
+    setShowSearchModal(true);
+
+    try {
+      const apiKey = (import.meta.env.VITE_GEMINI_API_KEY || "").replace(/^["']|["']$/g, '');
+      if (!apiKey) {
+        setAiSearchResult("API Key missing. Cannot process search.");
+        setIsAiSearching(false);
+        return;
+      }
+
+      const prompt = `Act as an elite fitness and nutrition expert. Answer the following user query: "${aiSearchQuery.trim()}".
+      IMPORTANT RULES:
+      - ONLY answer if the question is related to fitness, health, nutrition, diet food, gym, cardio, or aerobics.
+      - If it is NOT related to these topics, respond EXACTLY with: "I'm a fitness assistant! I only answer questions related to health, fitness, and nutrition. Let's get back on track!"
+      - Keep your answer concise, motivating, highly informative, and use bullet points where helpful. Return plain text.`;
+
+      const payload = {
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { responseMimeType: "text/plain" }
+      };
+
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) throw new Error("API Error");
+      const data = await response.json();
+      const answer = data.candidates?.[0]?.content?.parts?.[0]?.text || "No answer returned. Keep pushing!";
+      setAiSearchResult(answer);
+    } catch (err) {
+      setAiSearchResult("Something went wrong checking the database. Check your connection!");
+    } finally {
+      setIsAiSearching(false);
     }
   };
 
@@ -2708,9 +2860,20 @@ export default function App() {
                   className="flex items-center gap-2 px-4 py-2.5 rounded-full glass-ice border border-cyan-400/50 text-cyan-200 hover:bg-cyan-400/15 hover:text-cyan-100 active:scale-95 transition-all shadow-sm text-xs font-black uppercase tracking-wider animate-pulse-slow"
                 >
                   <Download className="w-4 h-4" />
-                  <span className="hidden sm:inline">Install App</span>
+                  <span className="hidden sm:inline">Download App</span>
                 </button>
               )}
+              
+              {/* Expanding Search Badge for Landing Page */}
+              <div className="relative flex items-center">
+                <form onSubmit={(e) => { e.preventDefault(); handleFitnessSearch(); setIsLandingSearchExpanded(false); }} className={`flex items-center glass-ice backdrop-blur-md border border-cyan-400/50 rounded-full overflow-hidden transition-all duration-300 ease-in-out ${isLandingSearchExpanded ? 'w-48 sm:w-64 px-3 opacity-100' : 'w-0 opacity-0 border-transparent pointer-events-none'}`}>
+                  <input type="text" value={aiSearchQuery} onChange={(e) => setAiSearchQuery(e.target.value)} placeholder="Ask AI about fitness..." className="bg-transparent border-none outline-none text-xs font-bold text-sky-100 w-full py-2 placeholder:text-sky-300/50" />
+                </form>
+                <button onClick={() => setIsLandingSearchExpanded(!isLandingSearchExpanded)} className="w-10 h-10 ml-2 rounded-full glass-ice border border-white/20 flex items-center justify-center text-cyan-200 hover:text-white hover:bg-cyan-400/20 transition-all shadow-lg active:scale-90">
+                  <Search className="w-5 h-5" />
+                </button>
+              </div>
+
               <ThemePicker bgTheme={bgTheme} setBgTheme={setBgTheme} />
             </div>
           </header>
@@ -3324,17 +3487,6 @@ export default function App() {
             </div>
 
             <div className="flex items-center gap-3">
-              {isInstallable && (
-                <button
-                  id="pwa-install-btn-workout"
-                  onClick={handleInstallApp}
-                  title="Install BurnOut App"
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-full glass-ice border border-cyan-400/50 text-cyan-200 hover:bg-cyan-400/15 active:scale-95 transition-all shadow-sm text-xs font-black uppercase tracking-wider"
-                >
-                  <Download className="w-4 h-4" />
-                  <span className="hidden sm:inline">Install</span>
-                </button>
-              )}
               <button onClick={handleDownloadPDF} className="p-3 rounded-full glass-ice text-sky-100 border border-white/15 hover:border-cyan-400/50 shadow-md active:scale-95 transition-all"><Download className="w-6 h-6" /></button>
               <ThemePicker bgTheme={bgTheme} setBgTheme={setBgTheme} />
             </div>
@@ -3353,9 +3505,13 @@ export default function App() {
               </button>
             ))}
 
-            <form onSubmit={handleImageSearch} className="ml-2 flex items-center gap-2 glass-ice backdrop-blur-md border border-white/15 rounded-2xl px-4 py-2 shadow-sm shrink-0">
-              <button type="submit" className="hover:scale-110 transition-transform"><Search className={`w-4 h-4 ${theme.text}`} /></button>
-              <input type="text" value={imageSearch} onChange={(e) => setImageSearch(e.target.value)} placeholder="Exercise image..." className="bg-transparent border-none outline-none text-xs font-bold text-sky-100 w-32 focus:w-48 transition-all placeholder:text-sky-300/40" />
+          </div>
+
+          {/* SEARCH BAR BELOW DAYS BAR */}
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <form onSubmit={handleFitnessSearch} className="flex items-center gap-3 glass-panel border border-cyan-400/30 rounded-2xl px-5 py-3.5 shadow-lg w-full transition-all focus-within:border-cyan-400/70 focus-within:shadow-[0_0_15px_rgba(34,211,238,0.2)]">
+              <button type="submit" className="hover:scale-110 transition-transform"><Search className={`w-5 h-5 text-cyan-400`} /></button>
+              <input type="text" value={aiSearchQuery} onChange={(e) => setAiSearchQuery(e.target.value)} placeholder="Ask BurnOut AI any fitness or nutrition question..." className="bg-transparent border-none outline-none text-sm font-bold text-white w-full transition-all placeholder:text-white/30" />
             </form>
           </div>
         </header>
@@ -3370,71 +3526,61 @@ export default function App() {
         {needRefresh && (
           <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[300] w-[calc(100%-2rem)] max-w-sm">
             <div className="flex items-center gap-4 px-5 py-4 rounded-2xl glass-panel border border-cyan-400/30 shadow-2xl backdrop-blur-2xl">
-              <div className="p-2 rounded-xl bg-cyan-400/15 border border-cyan-400/25">
-                <Sparkles className="w-5 h-5 text-cyan-300" />
+              <div className="w-10 h-10 rounded-full bg-cyan-400/20 flex items-center justify-center shrink-0">
+                <Activity className="w-5 h-5 text-cyan-400 animate-pulse" />
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-black text-white leading-tight">New version available!</p>
-                <p className="text-[10px] text-sky-300/60 font-bold mt-0.5">BurnOut has been updated</p>
+              <div className="flex-1">
+                <p className="text-sm font-black text-white">App Update Available</p>
+                <p className="text-[10px] uppercase tracking-widest text-sky-200/70 font-bold mt-0.5">New features ready</p>
               </div>
               <button
                 onClick={() => updateServiceWorker(true)}
-                className="shrink-0 px-4 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-900 font-black text-xs uppercase tracking-wider transition-all active:scale-95"
+                className="px-4 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-900 text-[10px] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95"
               >
                 Update
-              </button>
-              <button
-                onClick={() => setNeedRefresh(false)}
-                className="shrink-0 p-1.5 rounded-lg glass-ice text-sky-300 hover:text-white border border-white/10 text-xs font-black transition-all active:scale-90"
-              >
-                ✕
               </button>
             </div>
           </div>
         )}
 
-        {/* PWA INSTALLATION GUIDE MODAL */}
+        {/* PWA INSTALL GUIDE MODAL */}
         {showInstallGuide && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-            <div className="glass-panel border border-white/20 max-w-md w-full rounded-[2.5rem] p-6 sm:p-8 relative shadow-2xl text-left glass-shimmer">
-              <div className="absolute top-0 right-0 w-48 h-48 bg-cyan-400/10 blur-3xl rounded-full -mr-16 -mt-16 pointer-events-none"></div>
-              
-              <div className="flex justify-between items-start mb-6">
-                <div className="p-3 rounded-2xl bg-cyan-400/15 border border-cyan-400/25 text-cyan-300">
-                  <Download className="w-6 h-6" />
+          <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+            <div className="glass-panel border border-cyan-400/30 max-w-md w-full rounded-[2.5rem] p-6 sm:p-8 relative shadow-2xl">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-cyan-400/10 blur-3xl rounded-full -mr-10 -mt-10 pointer-events-none"></div>
+
+              <div className="flex justify-center mb-6 relative z-10">
+                <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-cyan-400 to-blue-600 p-[2px] shadow-[0_0_30px_rgba(34,211,238,0.3)]">
+                  <div className="w-full h-full bg-[#0b1d35] rounded-3xl flex items-center justify-center">
+                    <Download className="w-7 h-7 text-cyan-400" />
+                  </div>
                 </div>
-                <button
-                  onClick={() => setShowInstallGuide(false)}
-                  className="p-2 rounded-full glass-ice text-sky-200 hover:text-white border border-white/10 active:scale-90 transition-all text-sm font-black w-8 h-8 flex items-center justify-center"
-                >
-                  ✕
-                </button>
               </div>
 
-              <h3 className="text-2xl font-black text-white tracking-tight uppercase mb-2">Install BurnOut PWA</h3>
-              <p className="text-sky-200/70 text-xs font-bold leading-relaxed mb-6">
-                Install BurnOut on your device for absolute offline speed, quick access from your home screen, and elite full-screen tracking.
+              <h3 className="text-2xl font-black text-white text-center mb-2 uppercase tracking-tighter">Install BurnOut</h3>
+              <p className="text-sky-200/70 text-sm font-bold text-center leading-relaxed mb-8">
+                Get the full app experience directly on your home screen. Works offline and loads instantly.
               </p>
 
               <div className="space-y-4">
                 {/* iOS Instructions */}
                 <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex gap-4">
-                  <span className="text-2xl shrink-0">🍏</span>
+                  <span className="text-2xl shrink-0">🍎</span>
                   <div>
-                    <h4 className="text-sm font-black text-white uppercase tracking-tight">iOS / Apple Safari</h4>
+                    <h4 className="text-sm font-black text-white uppercase tracking-tight">iOS / iPadOS</h4>
                     <p className="text-[11px] text-sky-200/60 font-bold mt-1 leading-relaxed">
-                      Tap the <strong className="text-cyan-300">Share</strong> button at the bottom navigation bar, then select <strong className="text-cyan-300">Add to Home Screen</strong>.
+                      Tap the <strong className="text-cyan-300">Share</strong> button at the bottom of Safari, then scroll down and tap <strong className="text-cyan-300">Add to Home Screen</strong>.
                     </p>
                   </div>
                 </div>
 
-                {/* Android / Chrome Instructions */}
+                {/* Android Instructions */}
                 <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex gap-4">
                   <span className="text-2xl shrink-0">🤖</span>
                   <div>
-                    <h4 className="text-sm font-black text-white uppercase tracking-tight">Android / Google Chrome</h4>
+                    <h4 className="text-sm font-black text-white uppercase tracking-tight">Android</h4>
                     <p className="text-[11px] text-sky-200/60 font-bold mt-1 leading-relaxed">
-                      Tap the <strong className="text-cyan-300">three dots menu</strong> next to the address bar, then select <strong className="text-cyan-300">Install App</strong>.
+                      Tap the <strong className="text-cyan-300">Menu (3 dots)</strong> at the top right of Chrome, then tap <strong className="text-cyan-300">Install app</strong> or <strong className="text-cyan-300">Add to Home screen</strong>.
                     </p>
                   </div>
                 </div>
@@ -3457,6 +3603,39 @@ export default function App() {
               >
                 GOT IT, LET'S DO IT
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* AI SEARCH MODAL */}
+        {showSearchModal && (
+          <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+            <div className="glass-panel border border-cyan-400/50 w-full max-w-lg rounded-[2.5rem] p-6 sm:p-8 relative shadow-[0_0_60px_rgba(34,211,238,0.2)]">
+              <button
+                onClick={() => setShowSearchModal(false)}
+                className="absolute top-6 right-6 w-8 h-8 flex items-center justify-center rounded-full glass-ice text-sky-200 hover:text-white border border-white/10 active:scale-90 transition-all text-xs font-black bg-rose-500/10 hover:bg-rose-500 hover:border-rose-400"
+              >✕</button>
+              
+              <div className="flex items-center gap-4 mb-6 border-b border-white/10 pb-5">
+                <div className="w-12 h-12 rounded-full bg-cyan-400/20 border border-cyan-400/50 flex items-center justify-center text-cyan-300 shadow-[0_0_15px_rgba(34,211,238,0.2)] shrink-0">
+                  <Search className="w-6 h-6" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-400 mb-0.5">BurnOut AI Assistant</div>
+                  <div className="text-sm font-bold text-white truncate max-w-full">{aiSearchQuery}</div>
+                </div>
+              </div>
+
+              <div className="min-h-[150px] max-h-[50vh] overflow-y-auto custom-scrollbar pr-2 text-sm text-sky-100/90 leading-relaxed font-medium space-y-3">
+                {isAiSearching ? (
+                  <div className="flex flex-col items-center justify-center h-[150px] gap-4 text-cyan-300">
+                    <Loader2 className="w-8 h-8 animate-spin" />
+                    <span className="text-[10px] uppercase font-black tracking-[0.2em] animate-pulse">Analyzing Fitness DB...</span>
+                  </div>
+                ) : (
+                  <div className="prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-li:my-1 prose-headings:text-cyan-300" dangerouslySetInnerHTML={{ __html: aiSearchResult.replace(/\n/g, '<br/>') }} />
+                )}
+              </div>
             </div>
           </div>
         )}
