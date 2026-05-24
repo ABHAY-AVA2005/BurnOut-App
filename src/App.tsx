@@ -1851,7 +1851,7 @@ const ZenPlayer = () => {
 
       {/* Full panel */}
       {open && (
-        <div className="zen-slide-up glass-panel border border-white/20 rounded-[2rem] p-5 w-72 shadow-2xl">
+        <div className="zen-slide-up bg-[#0b1d35]/95 backdrop-blur-3xl border border-cyan-400/30 rounded-[2rem] p-5 w-[90vw] sm:w-80 max-w-sm shadow-[0_0_40px_rgba(0,0,0,0.5)]">
           {/* Header */}
           <div className="flex justify-between items-center mb-4 shrink-0">
             <div>
@@ -1951,19 +1951,21 @@ const ZenPlayer = () => {
       )}
 
       {/* Floating toggle pill */}
-      <button
-        id="zen-mode-toggle"
-        onClick={()=>setOpen(!open)}
-        className={`flex items-center gap-2.5 px-4 py-3 rounded-2xl glass-panel border shadow-2xl hover:border-cyan-400/60 transition-all active:scale-95 ${playing ? 'border-cyan-400/40 zen-pulse-ring' : 'border-white/20'}`}
-      >
-        <div className={`w-7 h-7 rounded-xl bg-cyan-400/15 border border-cyan-400/25 flex items-center justify-center text-base select-none ${playing ? 'animate-pulse' : ''}`}>
-          {playing ? t.icon : '🎵'}
-        </div>
-        <div className="text-left">
-          <div className="text-[10px] font-black uppercase tracking-[0.2em] text-sky-300/60">Zen Mode</div>
-          {playing && <div className="text-[10px] font-bold text-cyan-300 truncate max-w-[100px] leading-tight">{t.name}</div>}
-        </div>
-      </button>
+      {!open && (
+        <button
+          id="zen-mode-toggle"
+          onClick={()=>setOpen(!open)}
+          className={`flex items-center gap-2.5 px-4 py-3 rounded-2xl glass-panel border shadow-2xl hover:border-cyan-400/60 transition-all active:scale-95 ${playing ? 'border-cyan-400/40 zen-pulse-ring' : 'border-white/20'}`}
+        >
+          <div className={`w-7 h-7 rounded-xl bg-cyan-400/15 border border-cyan-400/25 flex items-center justify-center text-base select-none ${playing ? 'animate-pulse' : ''}`}>
+            {playing ? t.icon : '🎵'}
+          </div>
+          <div className="text-left">
+            <div className="text-[10px] font-black uppercase tracking-[0.2em] text-sky-300/60">Zen Mode</div>
+            {playing && <div className="text-[10px] font-bold text-cyan-300 truncate max-w-[100px] leading-tight">{t.name}</div>}
+          </div>
+        </button>
+      )}
     </div>
   );
 };
