@@ -2030,7 +2030,7 @@ const ZenPlayer = () => {
 
       {/* Full panel */}
       {open && (
-        <div className="zen-slide-up bg-black/80 backdrop-blur-3xl border-2 border-cyan-400/50 rounded-[2.5rem] p-6 w-[90vw] sm:w-80 max-w-sm shadow-[0_0_60px_rgba(34,211,238,0.3)] relative overflow-hidden group">
+        <div className="zen-slide-up bg-black/80 backdrop-blur-3xl border-2 border-cyan-400/50 rounded-[2.5rem] p-6 w-[90vw] sm:w-80 max-w-sm max-h-[85vh] overflow-y-auto overflow-x-hidden shadow-[0_0_60px_rgba(34,211,238,0.3)] relative group flex flex-col">
           {/* Cyberpunk grid bg */}
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none mix-blend-overlay"></div>
           {/* Awesome glow */}
@@ -2216,11 +2216,6 @@ const ZenPlayer = () => {
                 </div>
               </div>
             )}
-          </div>
-        </div>
-                </button>
-              ))}
-            </div>
           </div>
         </div>
       )}
@@ -2904,7 +2899,7 @@ export default function App() {
                 </span>, Perform better
               </h2>
 
-              <p className="text-xs font-black text-sky-300/50 uppercase tracking-[0.3em] pt-1">Elite Discipline · Zero Excuses</p>
+              <p className="text-[10px] sm:text-xs font-black text-sky-300/50 uppercase tracking-widest sm:tracking-[0.3em] pt-1">Elite Discipline · Zero Excuses</p>
             </div>
 
             {/* ATHLETIC SPLIT IMAGE HEADERS */}
@@ -3118,7 +3113,7 @@ export default function App() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                   {[...Object.values(appLevels), ...customModules].filter(l => l.metrics).map((level) => (
                     <div key={`metric-${level.id}`} className="glass-panel rounded-3xl p-5 border border-white/12 transition-all hover:border-cyan-400/40 shadow-sm hover:shadow-md group">
-                      <div className="font-black text-sm uppercase tracking-widest text-white border-b border-white/10 pb-3 mb-4 truncate">{level.title}</div>
+                      <div className="font-black text-sm uppercase tracking-widest text-white border-b border-white/10 pb-3 mb-4 line-clamp-2 leading-snug">{level.title}</div>
                       <ul className="space-y-3 list-none pl-0">
                         {level.metrics.met && (
                           <li className="text-xs font-bold text-sky-200/60 flex items-center gap-3 group-hover:text-sky-100 transition-colors">
